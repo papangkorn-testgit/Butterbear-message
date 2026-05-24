@@ -6,7 +6,7 @@ const fredoka = Fredoka({
 });
 
 export const metadata = {
-  title: "Bear Message",
+  title: "Butterbear",
   description: "For tired days",
 };
 
