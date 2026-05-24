@@ -62,3 +62,9 @@ html {
   background: #e7c9b3;
   border-radius: 999px;
 }
+
+/* Selection */
+::selection {
+  background: #f5d2bb;
+  color: #7A5C46;
+}

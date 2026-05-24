@@ -44,28 +44,31 @@ export default function Home() {
     <main className="h-[100dvh] bg-[#FFF7EF] flex items-center justify-center overflow-hidden">
 
       {/* Main Card */}
-      <div className="w-full max-w-lg h-[100dvh] bg-[#FFFDF9] overflow-hidden relative">
+      <div className="w-full max-w-md h-[100dvh] sm:h-[820px] bg-[#FFFDF9] rounded-none sm:rounded-[40px] shadow-2xl border-0 sm:border-[6px] border-[#F4E3D7] overflow-hidden relative">
+
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('/pattern.png')] bg-cover" />
 
         {/* Header */}
-        <div className="bg-[#FFE9D6] p-6 relative z-10 shadow-sm">
+        <div className="bg-[#FFE9D6] p-5 sm:p-6 relative z-10">
 
           <div className="flex items-center gap-4">
 
             <Image
               src="/bear.png"
-              width={95}
-              height={95}
+              width={75}
+              height={75}
               alt="bear"
               className="rounded-full shadow-md"
             />
 
             <div>
 
-              <h1 className="text-4xl text-[#8B5E3C] font-bold">
+              <h1 className="text-2xl sm:text-3xl text-[#8B5E3C] font-bold">
                 Butterbear
               </h1>
 
-              <p className="text-[#B07D62] text-lg">
+              <p className="text-[#B07D62] text-sm sm:text-base">
                 สำหรับวันที่เหนื่อย 💖
               </p>
 
@@ -76,20 +79,20 @@ export default function Home() {
         </div>
 
         {/* Chat Area */}
-        <div className="p-7 space-y-5 overflow-y-auto h-[calc(100dvh-230px)] relative z-10">
+        <div className="flex-1 p-5 space-y-4 overflow-y-auto relative z-10 h-[calc(100dvh-230px)] sm:h-[540px]">
 
           {/* First Message */}
           <div className="flex gap-3 items-start animate-fadeIn">
 
             <Image
               src="/bear2.png"
-              width={60}
-              height={60}
+              width={45}
+              height={45}
               alt="bear"
               className="rounded-full"
             />
 
-            <div className="bg-[#FFF0DD] text-[#7A5C46] text-xl px-6 py-4 rounded-[25px] max-w-[80%] shadow">
+            <div className="bg-[#FFF0DD] text-[#7A5C46] px-5 py-3 rounded-[25px] max-w-[80%] shadow">
               สวัสดีคนเก่งของหมีเนย 🧸
             </div>
 
@@ -105,13 +108,13 @@ export default function Home() {
 
               <Image
                 src="/bear2.png"
-                width={60}
-                height={60}
+                width={45}
+                height={45}
                 alt="bear"
                 className="rounded-full"
               />
 
-              <div className="bg-[#FFE7C7] text-[#7A5C46] text-xl px-6 py-4 rounded-[25px] max-w-[80%] shadow-lg">
+              <div className="bg-[#FFE7C7] text-[#7A5C46] px-5 py-3 rounded-[25px] max-w-[80%] shadow-lg">
                 {msg}
               </div>
 
@@ -125,12 +128,12 @@ export default function Home() {
         </div>
 
         {/* Bottom Bear */}
-        <div className="absolute bottom-32 right-2 z-10">
+        <div className="absolute bottom-32 sm:bottom-28 right-3 sm:right-4 z-10">
 
           <Image
             src="/bear.png"
-            width={220}
-            height={220}
+            width={140}
+            height={140}
             alt="bear"
             className="drop-shadow-xl"
           />
@@ -142,7 +145,7 @@ export default function Home() {
 
           <button
             onClick={sendMessage}
-            className="w-full bg-[#C89B76] hover:scale-[1.02] active:scale-95 transition-all duration-300 text-white py-5 rounded-2xl text-2xl shadow-lg"
+            className="w-full bg-[#C89B76] hover:scale-[1.02] active:scale-95 transition-all duration-300 text-white py-4 rounded-2xl text-base sm:text-lg shadow-lg"
           >
             รับกำลังใจจากหมีเนย 🤍
           </button>
