@@ -1,65 +1,158 @@
+"use client";
+
 import Image from "next/image";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 export default function Home() {
+  const messages = [
+    "วันนี้เหนื่อยมั้ย 🧸",
+    "พักบ้างนะะ",
+    "อย่าลืมหาอะไรกินน",
+    "คนเก่งของวันนี้ 🌷",
+    "มีคนเอาใจช่วยอยู่นะ",
+    "ขอให้เวรวันนี้ไม่หนักเกินไป",
+    "พักสายตาด้วยย",
+    "วันนี้เก่งมากแล้วนะ ✨",
+    "ส่งกำลังใจให้คนเก่ง 💖",
+  ];
+
+  const [chat, setChat] = useState<string[]>([]);
+
+  const chatEndRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const sendMessage = () => {
+    const random =
+      messages[
+        Math.floor(Math.random() * messages.length)
+      ];
+
+    setChat((prev) => [...prev, random]);
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [chat]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <main className="h-[100dvh] bg-[#FFF7EF] flex items-center justify-center overflow-hidden">
+
+      {/* Main Card */}
+      <div className="w-full max-w-md h-[100dvh] sm:h-[820px] bg-[#FFFDF9] rounded-none sm:rounded-[40px] shadow-2xl border-0 sm:border-[6px] border-[#F4E3D7] overflow-hidden relative">
+
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('/pattern.png')] bg-cover" />
+
+        {/* Header */}
+        <div className="bg-[#FFE9D6] p-5 sm:p-6 relative z-10">
+
+          <div className="flex items-center gap-4">
+
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/bear.png"
+              width={75}
+              height={75}
+              alt="bear"
+              className="rounded-full shadow-md"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            <div>
+
+              <h1 className="text-2xl sm:text-3xl text-[#8B5E3C] font-bold">
+                Butterbear
+              </h1>
+
+              <p className="text-[#B07D62] text-sm sm:text-base">
+                สำหรับวันที่เหนื่อย 💖
+              </p>
+
+            </div>
+
+          </div>
+
         </div>
-      </main>
-    </div>
+
+        {/* Chat Area */}
+        <div className="flex-1 p-5 space-y-4 overflow-y-auto relative z-10 h-[calc(100dvh-230px)] sm:h-[540px]">
+
+          {/* First Message */}
+          <div className="flex gap-3 items-start animate-fadeIn">
+
+            <Image
+              src="/bear2.png"
+              width={45}
+              height={45}
+              alt="bear"
+              className="rounded-full"
+            />
+
+            <div className="bg-[#FFF0DD] text-[#7A5C46] px-5 py-3 rounded-[25px] max-w-[80%] shadow">
+              สวัสดีคนเก่งของหมีเนย 🧸
+            </div>
+
+          </div>
+
+          {/* Messages */}
+          {chat.map((msg, index) => (
+
+            <div
+              key={index}
+              className="flex gap-3 items-start animate-fadeIn"
+            >
+
+              <Image
+                src="/bear2.png"
+                width={45}
+                height={45}
+                alt="bear"
+                className="rounded-full"
+              />
+
+              <div className="bg-[#FFE7C7] text-[#7A5C46] px-5 py-3 rounded-[25px] max-w-[80%] shadow-lg">
+                {msg}
+              </div>
+
+            </div>
+
+          ))}
+
+          {/* Auto Scroll */}
+          <div ref={chatEndRef} />
+
+        </div>
+
+        {/* Bottom Bear */}
+        <div className="absolute bottom-32 sm:bottom-28 right-3 sm:right-4 z-10">
+
+          <Image
+            src="/bear.png"
+            width={140}
+            height={140}
+            alt="bear"
+            className="drop-shadow-xl"
+          />
+
+        </div>
+
+        {/* Bottom Button */}
+        <div className="absolute bottom-0 left-0 w-full px-5 pt-3 pb-8 bg-[#FFF8F1] border-t border-[#F3D8C2] z-10">
+
+          <button
+            onClick={sendMessage}
+            className="w-full bg-[#C89B76] hover:scale-[1.02] active:scale-95 transition-all duration-300 text-white py-4 rounded-2xl text-base sm:text-lg shadow-lg"
+          >
+            รับกำลังใจจากหมีเนย 🤍
+          </button>
+
+        </div>
+
+      </div>
+    </main>
   );
 }
