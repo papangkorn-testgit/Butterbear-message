@@ -366,7 +366,7 @@ export default function Home() {
 
               {/* title */}
               <div style={{ fontSize:17, color:"#7A4F2E", fontWeight:600, marginBottom:10, lineHeight:1.5 }}>
-                วันที่ 26 มีประชุมเช้าใช่มั้ยแงง 🥺
+                วันนี้มีประชุมตอนเช้าใช่มั้ยแงง 🥺
               </div>
 
               {/* message */}
