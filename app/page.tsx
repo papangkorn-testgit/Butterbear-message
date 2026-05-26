@@ -16,6 +16,11 @@ const MESSAGES = [
   "หมีเนยรักนะ 🍯",
   "ทำดีมากแล้วนะวันนี้ 🌸",
   "อย่าลืมดูแลตัวเองด้วยนะ",
+  "อย่าลืมตอบข้อความคนที่ทำเว็บไซต์นี้ด้วยนะ 🐾",
+  "ดื่มน้ำด้วยนะะ หมีเนยเป็นห่วง 💧",
+  "ยิ้มหน่อยนะ สวยอยู่แล้ว 🌸",
+  "วันนี้ก็ผ่านไปได้อีกวันนะ เก่งมากเลย 🍯",
+  "มีหมีเนยอยู่ข้างๆตลอดนะ 💛",
 ];
 
 const BEAR_REACTIONS = ["🧸", "💛", "🌸", "✨", "🍯", "💕", "🌷", "⭐"];
@@ -27,7 +32,14 @@ interface BearPop { id: number; x: number; y: number; emoji: string; }
 export default function Home() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const isSpecialTime = () => {
+    const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    const date = thai.getDate();
+    const hour = thai.getHours();
+    return date === 26 && hour >= 7 && hour < 12;
+  };
+  const [showSpecialPopup, setShowSpecialPopup] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => !isSpecialTime());
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [isPressed, setIsPressed] = useState(false);
   const [msgCounter, setMsgCounter] = useState(0);
@@ -74,8 +86,13 @@ export default function Home() {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat, isTyping]);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowWelcome(false), 3200);
-    return () => clearTimeout(t);
+    if (isSpecialTime()) {
+      setShowSpecialPopup(true);
+      setTimeout(() => playPopupSound(), 400);
+    } else {
+      const t = setTimeout(() => setShowWelcome(false), 3200);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   // ── Audio ──
@@ -110,36 +127,106 @@ export default function Home() {
     return `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, "0")}`;
   };
 
-  // ── Bear tap effect ──
+  // ── Message pop sound ──
+  const playMessageSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      // เสียง pop แบบแชท — sine wave สั้นๆ fade out
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.18);
+      osc.onended = () => ctx.close();
+    } catch {}
+  }, []);
+
+  // ── Popup ting sound ──
+  const playPopupSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const now = ctx.currentTime;
+
+      // โน้ต 2 ตัว เหมือน xylophone เบาๆ
+      [[1046, 0], [1318, 0.12]].forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + delay);
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(0.13, now + delay + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.5);
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.5);
+        osc.onended = () => ctx.close();
+      });
+    } catch {}
+  }, []);
+
+  // ── Bear tap sound ──
+  const playBearSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const now = ctx.currentTime;
+
+      // boing — เสียงสปริงกระเด้ง
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = "sine";
+      // pitch ขึ้นแล้วลงแบบ boing
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(680, now + 0.06);
+      osc.frequency.exponentialRampToValueAtTime(420, now + 0.18);
+      osc.frequency.exponentialRampToValueAtTime(380, now + 0.32);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+      osc.start(now);
+      osc.stop(now + 0.35);
+      osc.onended = () => ctx.close();
+    } catch {}
+  }, []);
+
+  // ── Bear tap ──
   const handleBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
+
     setBearBounce(true);
     setTimeout(() => setBearBounce(false), 600);
+    playBearSound();
 
-    // random shake every 3rd tap
-    if (Math.random() < 0.3) {
+    if (Math.random() < 0.25) {
       setBearShake(true);
       setTimeout(() => setBearShake(false), 500);
     }
 
-    // get tap position
     let cx = 0, cy = 0;
     if ("touches" in e && e.touches.length > 0) {
-      cx = e.touches[0].clientX;
-      cy = e.touches[0].clientY;
+      cx = e.touches[0].clientX; cy = e.touches[0].clientY;
     } else if ("clientX" in e) {
-      cx = e.clientX;
-      cy = e.clientY;
+      cx = e.clientX; cy = e.clientY;
     }
 
-    // spawn 3-5 floating emojis
     const count = 3 + Math.floor(Math.random() * 3);
     const newPops: BearPop[] = Array.from({ length: count }, () => {
       bearPopIdRef.current += 1;
       return {
         id: bearPopIdRef.current,
-        x: cx + (Math.random() - 0.5) * 60,
-        y: cy - 10 + (Math.random() - 0.5) * 30,
+        x: cx + (Math.random() - 0.5) * 70,
+        y: cy - 10 + (Math.random() - 0.5) * 40,
         emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)],
       };
     });
@@ -165,6 +252,7 @@ export default function Home() {
       setMsgCounter(c => c + 1);
       setChat(prev => [...prev, { id: Date.now(), text: getRandomMessage() }]);
       setIsTyping(false);
+      playMessageSound();
     }, 1200 + Math.random() * 600);
   }, [isTyping, getRandomMessage]);
 
@@ -180,6 +268,14 @@ export default function Home() {
         @keyframes popIn { 0%{opacity:0;transform:translate(-50%,-50%) scale(0.7)} 70%{transform:translate(-50%,-50%) scale(1.05)} 100%{opacity:1;transform:translate(-50%,-50%) scale(1)} }
         .welcome-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;pointer-events:none; }
         .welcome-overlay { position:fixed;inset:0;background:rgba(255,235,215,0.7);backdrop-filter:blur(6px);z-index:99; }
+
+        /* Special popup */
+        @keyframes specialPopIn { 0%{opacity:0;transform:translate(-50%,-50%) scale(0.6) rotate(-3deg)} 65%{transform:translate(-50%,-50%) scale(1.06) rotate(1deg)} 100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)} }
+        .special-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:110;animation:specialPopIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        @keyframes heartFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.1)} }
+        .heart-float { animation:heartFloat 1.8s ease-in-out infinite; }
+        @keyframes shimmerBtn { 0%{background-position:200% center} 100%{background-position:-200% center} }
+        .special-btn { background:linear-gradient(90deg,#D4A07A,#E8B98A,#C07A50,#D4A07A);background-size:300% auto;animation:shimmerBtn 2.5s linear infinite; }
 
         @keyframes floatSparkle { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.5} 50%{transform:translateY(-18px) rotate(15deg);opacity:1} }
         .sparkle { position:absolute;animation:floatSparkle var(--dur) ease-in-out infinite;animation-delay:var(--delay);pointer-events:none;user-select:none; }
@@ -244,6 +340,63 @@ export default function Home() {
       {bearPops.map(p => (
         <div key={p.id} className="bear-pop" style={{ left: p.x, top: p.y }}>{p.emoji}</div>
       ))}
+
+
+      {/* Special popup — วันที่ 26 */}
+      {showSpecialPopup && (
+        <>
+          <div className="welcome-overlay" style={{ zIndex:109, background:"rgba(255,225,200,0.75)" }} />
+          <div className="special-popup">
+            <div style={{ background:"linear-gradient(145deg,#FFF8F0,#FFE8D0)", borderRadius:32, padding:"28px 24px 24px", textAlign:"center", border:"2.5px solid #F5C9A0", boxShadow:"0 24px 70px rgba(180,100,50,0.28)", width:"min(300px, calc(100vw - 48px))", position:"relative", overflow:"hidden" }}>
+
+              {/* bg deco */}
+              <div style={{ position:"absolute", top:-18, right:-18, fontSize:60, opacity:0.08, transform:"rotate(20deg)", pointerEvents:"none" }}>🧸</div>
+              <div style={{ position:"absolute", bottom:-14, left:-14, fontSize:50, opacity:0.08, transform:"rotate(-15deg)", pointerEvents:"none" }}>💛</div>
+
+              {/* bear2 image — tappable */}
+              <div className="heart-float" style={{ marginBottom:12, display:"flex", justifyContent:"center" }}>
+                <div
+                  onClick={handleBearTap}
+                  onTouchStart={handleBearTap}
+                  style={{ cursor:"pointer", borderRadius:"50%", display:"inline-block" }}
+                >
+                  <Image src="/bear2.png" width={76} height={76} alt="butterbear" style={{ borderRadius:"50%", border:"3px solid #FFD9B8", boxShadow:"0 8px 24px rgba(180,100,50,0.18)", display:"block" }} />
+                </div>
+              </div>
+
+              {/* title */}
+              <div style={{ fontSize:17, color:"#7A4F2E", fontWeight:600, marginBottom:10, lineHeight:1.5 }}>
+                วันที่ 26 มีประชุมเช้าใช่มั้ยแงง 🥺
+              </div>
+
+              {/* message */}
+              <div style={{ fontSize:13, color:"#A06845", lineHeight:1.85, marginBottom:18 }}>
+                ไม่เป็นไรนะ~ หมีเนยอยู่ตรงนี้แล้ว 🧸<br/>
+                หายใจลึกๆ แล้วก็ไปได้เลย<br/>
+                <span style={{ fontSize:12, color:"#B8724A" }}>วันนี้ก็เก่งมากแล้วนะ ที่ลุกขึ้นมา 🌸</span>
+              </div>
+
+              {/* button */}
+              <button
+                onClick={() => {
+                  setShowSpecialPopup(false);
+                  setShowWelcome(true);
+                  setTimeout(() => setShowWelcome(false), 3000);
+                }}
+                className="special-btn"
+                style={{ color:"#fff", border:"none", borderRadius:999, padding:"13px 32px", fontSize:15, fontWeight:600, fontFamily:"'Fredoka',sans-serif", cursor:"pointer", boxShadow:"0 6px 20px rgba(192,122,80,0.4)", letterSpacing:"0.3px", width:"100%" }}
+                onMouseDown={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
+                onTouchStart={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
+              >
+                พร้อมแล้วน้า 🧸💛
+              </button>
+
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Welcome */}
       {showWelcome && (
@@ -370,7 +523,7 @@ export default function Home() {
 
                 {/* Info */}
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:12, fontWeight:600, color:"#7A4F2E", overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>กอดอน (Warm Hugs)</div>
+                  <div style={{ fontSize:12, fontWeight:600, color:"#7A4F2E", overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>กอดอุ่น (Warm Hugs)</div>
                   <div style={{ fontSize:10, color:"#B07D62" }}>BUTTERBEAR 🧸</div>
                 </div>
 
