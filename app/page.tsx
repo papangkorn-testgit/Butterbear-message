@@ -55,6 +55,7 @@ export default function Home() {
   const [bearBounce, setBearBounce] = useState(false);
   const [bearShake, setBearShake] = useState(false);
   const [periodBearBounce, setPeriodBearBounce] = useState(false);
+  const [btnSparkle, setBtnSparkle] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -63,7 +64,6 @@ export default function Home() {
 
   const SPARKLE_EMOJIS = ["✨", "🌸", "💕", "⭐", "🍯", "🌷", "💛"];
 
-  // ── Live Thai clock ──
   useEffect(() => {
     const tick = () => {
       const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -75,7 +75,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  // ── Sparkles ──
   useEffect(() => {
     setSparkles(Array.from({ length: 10 }, (_, i) => ({
       id: i, x: Math.random() * 100, y: Math.random() * 60,
@@ -97,7 +96,6 @@ export default function Home() {
     }
   }, []);
 
-  // ── Audio ──
   useEffect(() => {
     const audio = new Audio("/bgm.mp3");
     audio.loop = true;
@@ -129,56 +127,45 @@ export default function Home() {
     return `${Math.floor(sec / 60)}:${Math.floor(sec % 60).toString().padStart(2, "0")}`;
   };
 
-  // ── Message pop sound ──
   const playMessageSound = useCallback(() => {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      osc.connect(gain); gain.connect(ctx.destination);
       osc.type = "sine";
       osc.frequency.setValueAtTime(880, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.08);
       gain.gain.setValueAtTime(0.18, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.18);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18);
       osc.onended = () => ctx.close();
     } catch {}
   }, []);
 
-  // ── Popup ting sound ──
   const playPopupSound = useCallback(() => {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const now = ctx.currentTime;
       [[1046, 0], [1318, 0.12]].forEach(([freq, delay]) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, now + delay);
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + delay);
         gain.gain.setValueAtTime(0, now + delay);
         gain.gain.linearRampToValueAtTime(0.13, now + delay + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.5);
-        osc.start(now + delay);
-        osc.stop(now + delay + 0.5);
+        osc.start(now + delay); osc.stop(now + delay + 0.5);
         osc.onended = () => ctx.close();
       });
     } catch {}
   }, []);
 
-  // ── Bear tap sound ──
   const playBearSound = useCallback(() => {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
       osc.type = "sine";
       osc.frequency.setValueAtTime(300, now);
       osc.frequency.exponentialRampToValueAtTime(680, now + 0.06);
@@ -187,73 +174,44 @@ export default function Home() {
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.start(now);
-      osc.stop(now + 0.35);
+      osc.start(now); osc.stop(now + 0.35);
       osc.onended = () => ctx.close();
     } catch {}
   }, []);
 
-  // ── Bear tap ──
   const handleBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    setBearBounce(true);
-    setTimeout(() => setBearBounce(false), 600);
+    setBearBounce(true); setTimeout(() => setBearBounce(false), 600);
     playBearSound();
-    if (Math.random() < 0.25) {
-      setBearShake(true);
-      setTimeout(() => setBearShake(false), 500);
-    }
+    if (Math.random() < 0.25) { setBearShake(true); setTimeout(() => setBearShake(false), 500); }
     let cx = 0, cy = 0;
-    if ("touches" in e && e.touches.length > 0) {
-      cx = e.touches[0].clientX; cy = e.touches[0].clientY;
-    } else if ("clientX" in e) {
-      cx = e.clientX; cy = e.clientY;
-    }
+    if ("touches" in e && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else if ("clientX" in e) { cx = e.clientX; cy = e.clientY; }
     const count = 3 + Math.floor(Math.random() * 3);
     const newPops: BearPop[] = Array.from({ length: count }, () => {
       bearPopIdRef.current += 1;
-      return {
-        id: bearPopIdRef.current,
-        x: cx + (Math.random() - 0.5) * 70,
-        y: cy - 10 + (Math.random() - 0.5) * 40,
-        emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)],
-      };
+      return { id: bearPopIdRef.current, x: cx + (Math.random() - 0.5) * 70, y: cy - 10 + (Math.random() - 0.5) * 40, emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)] };
     });
     setBearPops(prev => [...prev, ...newPops]);
-    setTimeout(() => {
-      setBearPops(prev => prev.filter(p => !newPops.find(n => n.id === p.id)));
-    }, 1000);
+    setTimeout(() => { setBearPops(prev => prev.filter(p => !newPops.find(n => n.id === p.id))); }, 1000);
   }, []);
 
-  // ── Period bear tap (in overlay) ──
   const handlePeriodBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    setPeriodBearBounce(true);
-    setTimeout(() => setPeriodBearBounce(false), 600);
+    setPeriodBearBounce(true); setTimeout(() => setPeriodBearBounce(false), 600);
     playBearSound();
     let cx = 0, cy = 0;
-    if ("touches" in e && e.touches.length > 0) {
-      cx = e.touches[0].clientX; cy = e.touches[0].clientY;
-    } else if ("clientX" in e) {
-      cx = e.clientX; cy = e.clientY;
-    }
+    if ("touches" in e && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else if ("clientX" in e) { cx = e.clientX; cy = e.clientY; }
     const count = 3 + Math.floor(Math.random() * 3);
     const newPops: BearPop[] = Array.from({ length: count }, () => {
       bearPopIdRef.current += 1;
-      return {
-        id: bearPopIdRef.current,
-        x: cx + (Math.random() - 0.5) * 70,
-        y: cy - 10 + (Math.random() - 0.5) * 40,
-        emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)],
-      };
+      return { id: bearPopIdRef.current, x: cx + (Math.random() - 0.5) * 70, y: cy - 10 + (Math.random() - 0.5) * 40, emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)] };
     });
     setBearPops(prev => [...prev, ...newPops]);
-    setTimeout(() => {
-      setBearPops(prev => prev.filter(p => !newPops.find(n => n.id === p.id)));
-    }, 1000);
+    setTimeout(() => { setBearPops(prev => prev.filter(p => !newPops.find(n => n.id === p.id))); }, 1000);
   }, []);
 
-  // ── Messages ──
   const getRandomMessage = useCallback(() => {
     if (usedIndexes.current.length >= MESSAGES.length) usedIndexes.current = [];
     const available = MESSAGES.map((_, i) => i).filter(i => !usedIndexes.current.includes(i));
@@ -293,18 +251,21 @@ export default function Home() {
         @keyframes shimmerBtn { 0%{background-position:200% center} 100%{background-position:-200% center} }
         .special-btn { background:linear-gradient(90deg,#D4A07A,#E8B98A,#C07A50,#D4A07A);background-size:300% auto;animation:shimmerBtn 2.5s linear infinite; }
 
-        /* Period page overlay */
-        @keyframes periodSlideIn { 0%{opacity:0;transform:translateY(40px) scale(0.96)} 100%{opacity:1;transform:translateY(0) scale(1)} }
-        .period-overlay { position:fixed;inset:0;z-index:200;background:rgba(255,225,200,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center; }
-        .period-card { animation:periodSlideIn 0.5s cubic-bezier(0.34,1.3,0.64,1) forwards; }
+        /* ── PERIOD PAGE ── */
+        @keyframes periodSlideIn { 0%{opacity:0;transform:translateY(50px) scale(0.94)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+        .period-overlay { position:fixed;inset:0;z-index:200;background:rgba(255,230,210,0.82);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center; }
+        .period-card { animation:periodSlideIn 0.55s cubic-bezier(0.34,1.3,0.64,1) forwards; }
 
+        /* Floating sparkles */
         @keyframes floatSparkle { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.5} 50%{transform:translateY(-18px) rotate(15deg);opacity:1} }
         .sparkle { position:absolute;animation:floatSparkle var(--dur) ease-in-out infinite;animation-delay:var(--delay);pointer-events:none;user-select:none; }
 
+        /* Typing dots */
         @keyframes typingDot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
         .typing-dot { width:8px;height:8px;border-radius:50%;background:#C89B76;display:inline-block;animation:typingDot 1.2s infinite ease-in-out; }
         .typing-dot:nth-child(2){animation-delay:0.2s} .typing-dot:nth-child(3){animation-delay:0.4s}
 
+        /* Bubble pop */
         @keyframes bubblePop { 0%{opacity:0;transform:translateY(12px) scale(0.85)} 60%{transform:translateY(-3px) scale(1.03)} 100%{opacity:1;transform:translateY(0) scale(1)} }
         .bubble-anim { animation:bubblePop 0.45s cubic-bezier(0.34,1.4,0.64,1) forwards; }
 
@@ -313,21 +274,16 @@ export default function Home() {
 
         .chat-area::-webkit-scrollbar{width:4px} .chat-area::-webkit-scrollbar-track{background:transparent} .chat-area::-webkit-scrollbar-thumb{background:#E8C9B0;border-radius:999px}
         .chat-area { scroll-behavior:smooth; }
-
         .card-shadow { box-shadow:0 4px 6px -1px rgba(180,120,80,0.08),0 20px 60px -10px rgba(180,120,80,0.18); }
 
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .online-dot { animation:pulse 2s ease-in-out infinite; }
-
         @keyframes blinkColon { 0%,100%{opacity:1} 50%{opacity:0.15} }
         .blink { animation:blinkColon 1s step-end infinite; }
-
         @keyframes bearBob { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-6px) rotate(1deg)} }
         .bear-bob { animation:bearBob 3s ease-in-out infinite; }
-
         @keyframes bearBounceAnim { 0%{transform:scale(1)} 25%{transform:scale(0.88) rotate(-4deg)} 55%{transform:scale(1.18) rotate(3deg)} 75%{transform:scale(0.96) rotate(-2deg)} 100%{transform:scale(1) rotate(0deg)} }
         .bear-bounce { animation:bearBounceAnim 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
-
         @keyframes bearShakeAnim { 0%,100%{transform:rotate(0deg)} 20%{transform:rotate(-8deg) scale(1.05)} 40%{transform:rotate(8deg) scale(1.05)} 60%{transform:rotate(-5deg)} 80%{transform:rotate(5deg)} }
         .bear-shake { animation:bearShakeAnim 0.5s ease forwards !important; }
 
@@ -336,26 +292,89 @@ export default function Home() {
 
         @keyframes musicBarA{0%,100%{height:4px}50%{height:14px}} @keyframes musicBarB{0%,100%{height:10px}50%{height:4px}} @keyframes musicBarC{0%,100%{height:7px}50%{height:16px}}
         .music-bar-a{animation:musicBarA 0.7s ease-in-out infinite} .music-bar-b{animation:musicBarB 0.9s ease-in-out infinite} .music-bar-c{animation:musicBarC 0.6s ease-in-out infinite}
-
         @keyframes vinylSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         .vinyl-spin{animation:vinylSpin 4s linear infinite}
 
         .progress-track{width:100%;height:4px;background:rgba(200,155,118,0.25);border-radius:999px;cursor:pointer;position:relative}
         .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#D4A07A,#C07A50);position:relative}
         .progress-fill::after{content:'';position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:#C07A50;box-shadow:0 0 6px rgba(192,122,80,0.5)}
-
         .vol-slider{-webkit-appearance:none;appearance:none;height:3px;border-radius:999px;background:linear-gradient(90deg,#C07A50 var(--vol),rgba(200,155,118,0.3) var(--vol));outline:none;width:100%}
         .vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#C07A50;cursor:pointer}
 
         .safe-bottom { padding-bottom:max(16px,env(safe-area-inset-bottom,16px)); }
 
-        /* Period button pulse */
-        @keyframes periodBtnGlow { 0%,100%{box-shadow:0 0 0 0 rgba(220,150,130,0.45)} 50%{box-shadow:0 0 0 8px rgba(220,150,130,0)} }
-        .period-btn-glow { animation:periodBtnGlow 2.5s ease-in-out infinite; }
+        /* ── ✨ MYSTERIOUS BUTTON ── */
+        @keyframes mysteriousGlow {
+          0%,100%{ box-shadow:0 0 8px 2px rgba(255,210,120,0.35), 0 4px 14px rgba(200,120,90,0.28); }
+          50%{ box-shadow:0 0 18px 6px rgba(255,220,140,0.55), 0 6px 20px rgba(200,120,90,0.38); }
+        }
+        @keyframes starTwinkle {
+          0%,100%{ opacity:1; transform:scale(1) rotate(0deg); }
+          30%{ opacity:0.6; transform:scale(0.8) rotate(-15deg); }
+          60%{ opacity:1; transform:scale(1.2) rotate(10deg); }
+        }
+        @keyframes starOrbit {
+          0%{ transform:rotate(0deg) translateX(14px) rotate(0deg); opacity:0.9; }
+          100%{ transform:rotate(360deg) translateX(14px) rotate(-360deg); opacity:0.9; }
+        }
+        .mysterious-btn {
+          animation: mysteriousGlow 2.2s ease-in-out infinite;
+          position: relative;
+          overflow: visible !important;
+        }
+        .mysterious-btn .star-icon {
+          animation: starTwinkle 1.6s ease-in-out infinite;
+          display: inline-block;
+          font-size: 19px;
+          filter: drop-shadow(0 0 4px rgba(255,230,100,0.8));
+        }
+        .mysterious-btn::before {
+          content: '⭐';
+          position: absolute;
+          font-size: 8px;
+          top: 50%; left: 50%;
+          animation: starOrbit 2.4s linear infinite;
+          pointer-events: none;
+          opacity: 0.85;
+          transform-origin: 0 0;
+        }
+        .mysterious-btn::after {
+          content: '✦';
+          position: absolute;
+          font-size: 7px;
+          top: 50%; left: 50%;
+          animation: starOrbit 3.2s linear infinite reverse;
+          pointer-events: none;
+          opacity: 0.7;
+          color: #FFD700;
+          transform-origin: 0 0;
+        }
 
-        /* Message lines fade in staggered */
-        @keyframes msgFadeIn { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
-        .msg-line { animation:msgFadeIn 0.5s ease forwards; }
+        /* ── PERIOD CARD inner styles ── */
+        @keyframes cardShimmer {
+          0%{ background-position: -200% center; }
+          100%{ background-position: 200% center; }
+        }
+        @keyframes msgFadeSlide {
+          0%{ opacity:0; transform:translateY(10px) scale(0.97); }
+          100%{ opacity:1; transform:translateY(0) scale(1); }
+        }
+        .msg-line { animation: msgFadeSlide 0.55s cubic-bezier(0.34,1.3,0.64,1) forwards; opacity:0; }
+        @keyframes bearGlow {
+          0%,100%{ filter: drop-shadow(0 6px 16px rgba(210,130,70,0.35)); }
+          50%{ filter: drop-shadow(0 10px 28px rgba(220,150,80,0.55)); }
+        }
+        .period-bear-glow { animation: bearGlow 2.2s ease-in-out infinite; }
+
+        @keyframes periodBtnShimmer {
+          0%{ background-position:200% center; }
+          100%{ background-position:-200% center; }
+        }
+        .period-close-btn {
+          background: linear-gradient(90deg,#E8A87C,#D4814E,#C9724A,#E09870,#E8A87C);
+          background-size:300% auto;
+          animation: periodBtnShimmer 3s linear infinite;
+        }
 
         @media(min-width:480px){
           .phone-card{height:min(860px,95dvh) !important;border-radius:44px !important;border:5px solid #F4DECE !important;}
@@ -370,83 +389,133 @@ export default function Home() {
       {/* ── PERIOD PAGE OVERLAY ── */}
       {showPeriodPage && (
         <div className="period-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPeriodPage(false); }}>
-          <div className="period-card" style={{ width:"min(340px, calc(100vw - 32px))", maxHeight:"90dvh", overflowY:"auto" }}>
-            <div style={{ background:"linear-gradient(160deg,#FFF5EE,#FFE8D8)", borderRadius:32, padding:"28px 24px 28px", border:"2px solid #F5C4A5", boxShadow:"0 30px 80px rgba(180,90,60,0.22)", position:"relative", overflow:"hidden" }}>
+          <div className="period-card" style={{ width:"min(348px, calc(100vw - 28px))", maxHeight:"92dvh", overflowY:"auto" }}>
+            <div style={{
+              background:"linear-gradient(160deg,#FFF8F2 0%,#FFF0E2 50%,#FFE8D4 100%)",
+              borderRadius:36,
+              padding:"0 0 24px",
+              border:"2px solid rgba(245,195,155,0.7)",
+              boxShadow:"0 32px 80px rgba(180,90,50,0.24), 0 8px 24px rgba(200,120,80,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+              position:"relative",
+              overflow:"hidden",
+            }}>
 
-              {/* bg deco */}
-              <div style={{ position:"absolute", top:-20, right:-16, fontSize:80, opacity:0.06, pointerEvents:"none", transform:"rotate(15deg)" }}>🧸</div>
-              <div style={{ position:"absolute", bottom:-16, left:-12, fontSize:64, opacity:0.06, pointerEvents:"none", transform:"rotate(-20deg)" }}>💛</div>
-              <div style={{ position:"absolute", top:"40%", left:-10, fontSize:40, opacity:0.05, pointerEvents:"none" }}>🌸</div>
+              {/* Top warm banner */}
+              <div style={{
+                background:"linear-gradient(135deg,#FDDCBF,#FBCAAA,#F9BCA0)",
+                borderRadius:"34px 34px 0 0",
+                padding:"22px 24px 18px",
+                position:"relative",
+                overflow:"hidden",
+                marginBottom:20,
+              }}>
+                {/* Banner deco circles */}
+                <div style={{ position:"absolute", top:-30, right:-30, width:100, height:100, borderRadius:"50%", background:"rgba(255,255,255,0.18)", pointerEvents:"none" }}/>
+                <div style={{ position:"absolute", bottom:-20, left:-20, width:70, height:70, borderRadius:"50%", background:"rgba(255,255,255,0.12)", pointerEvents:"none" }}/>
 
-              {/* close button */}
-              <button
-                onClick={() => setShowPeriodPage(false)}
-                style={{ position:"absolute", top:14, right:14, width:28, height:28, borderRadius:"50%", background:"rgba(200,140,110,0.15)", border:"none", cursor:"pointer", fontSize:14, display:"flex", alignItems:"center", justifyContent:"center", color:"#B07D62" }}
-              >✕</button>
+                {/* close */}
+                <button
+                  onClick={() => setShowPeriodPage(false)}
+                  style={{ position:"absolute", top:12, right:12, width:26, height:26, borderRadius:"50%", background:"rgba(180,100,60,0.15)", border:"none", cursor:"pointer", fontSize:12, display:"flex", alignItems:"center", justifyContent:"center", color:"#A06845", zIndex:2 }}
+                >✕</button>
 
-              {/* bear image */}
-              <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
-                <div
-                  className={periodBearBounce ? "bear-bounce" : "heart-float"}
-                  onClick={handlePeriodBearTap}
-                  onTouchStart={handlePeriodBearTap}
-                  style={{ cursor:"pointer", transformOrigin:"center bottom" }}
-                >
-                  <Image
-                    src="/bear2.png"
-                    width={88}
-                    height={88}
-                    alt="butterbear"
-                    style={{ borderRadius:"50%", border:"3px solid #FFD9B8", boxShadow:"0 10px 30px rgba(180,100,50,0.22)", display:"block" }}
-                  />
+                {/* Bear */}
+                <div style={{ display:"flex", justifyContent:"center", marginBottom:10 }}>
+                  <div
+                    className={`${periodBearBounce ? "bear-bounce" : "heart-float"} period-bear-glow`}
+                    onClick={handlePeriodBearTap}
+                    onTouchStart={handlePeriodBearTap}
+                    style={{ cursor:"pointer", transformOrigin:"center bottom" }}
+                  >
+                    <Image
+                      src="/bear2.png"
+                      width={86}
+                      height={86}
+                      alt="butterbear"
+                      style={{ borderRadius:"50%", border:"3.5px solid rgba(255,255,255,0.9)", boxShadow:"0 12px 32px rgba(180,100,50,0.28)", display:"block" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:19, color:"#6B3E20", fontWeight:600, lineHeight:1.4 }}>
+                    หมีเนยอยู่ตรงนี้เสมอนะ 🧸
+                  </div>
+                  <div style={{ fontSize:12, color:"#A06040", marginTop:4, opacity:0.85 }}>
+                    ไม่ว่าจะเป็นยังไง หมีเนยเข้าใจ 💛
+                  </div>
                 </div>
               </div>
 
-              {/* title */}
-              <div style={{ textAlign:"center", fontSize:18, color:"#7A4F2E", fontWeight:600, marginBottom:16, lineHeight:1.4 }}>
-                หมีเนยเข้าใจนะ 🧸💛
-              </div>
-
-              {/* message lines */}
-              <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom:20 }}>
+              {/* Message cards */}
+              <div style={{ display:"flex", flexDirection:"column", gap:8, padding:"0 18px", marginBottom:20 }}>
                 {[
-                  { delay:"0s",   text:"ช่วงนี้ที่พี่เป็นแบบนี้อยู่ หมีเนยเข้าใจนะ 🥺" },
-                  { delay:"0.1s", text:"มันไม่ใช่ความผิดของพี่เลย ร่างกายมันเป็นแบบนั้นเอง" },
-                  { delay:"0.2s", text:"พี่อยากอยู่คนเดียวก็ได้นะ ไม่ต้องรู้สึกผิดเลย 🌸" },
-                  { delay:"0.3s", text:"แล้วถ้าพี่พร้อมแล้ว ไม่ว่าจะอยากเล่นเกมด้วยกัน\nหรือแค่อยากคุย มีหมีเนยอยู่ตรงนี้เสมอนะ 💛" },
-                  { delay:"0.4s", text:"รอได้นะ ไม่ไปไหนเลย 🧸" },
+                  { delay:"0.05s", icon:"🥺", text:"ช่วงนี้ที่รู้สึกแบบนี้ ไม่ใช่ความผิดของพี่เลยนะแงง" },
+                  { delay:"0.15s", icon:"🌸", text:"อยากอยู่คนเดียวก็ได้นะ ไม่ต้องรู้สึกผิดเลยสักนิด" },
+                  { delay:"0.25s", icon:"🧸", text:"แล้วพอพี่พร้อมแล้ว ไม่ว่าจะอยากเล่นเกมส์ด้วยกัน\nคุยกันหรือแค่นั่งเงียบๆ มีหมีเนยอยู่ตรงนี้เสมอนะ" },
+                  { delay:"0.35s", icon:"💛", text:"หมีเนยไม่ไปไหนแงงค่อยให้กำลังตรงนี้เสมออ~" },
                 ].map((item, i) => (
                   <div
                     key={i}
                     className="msg-line"
                     style={{
                       animationDelay: item.delay,
-                      background: i % 2 === 0 ? "rgba(255,240,225,0.8)" : "rgba(255,230,210,0.6)",
-                      borderRadius:16,
-                      padding:"11px 15px",
+                      background: i % 2 === 0
+                        ? "linear-gradient(135deg,rgba(255,245,232,0.95),rgba(255,235,215,0.9))"
+                        : "linear-gradient(135deg,rgba(255,238,220,0.9),rgba(255,228,205,0.85))",
+                      borderRadius:18,
+                      padding:"12px 15px",
                       fontSize:13.5,
-                      color:"#8B5E3C",
-                      lineHeight:1.7,
-                      border:"1px solid rgba(244,200,160,0.4)",
+                      color:"#7A4A28",
+                      lineHeight:1.75,
+                      border:"1px solid rgba(245,200,160,0.45)",
                       whiteSpace:"pre-line",
+                      display:"flex",
+                      gap:10,
+                      alignItems:"flex-start",
+                      boxShadow:"0 2px 10px rgba(200,130,80,0.07)",
                     }}
                   >
-                    {item.text}
+                    <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>{item.icon}</span>
+                    <span>{item.text}</span>
                   </div>
                 ))}
               </div>
 
-              {/* close button */}
-              <button
-                onClick={() => setShowPeriodPage(false)}
-                style={{ width:"100%", background:"linear-gradient(135deg,#D4A07A,#C07A50)", color:"#fff", border:"none", borderRadius:999, padding:"13px 24px", fontSize:15, fontWeight:600, fontFamily:"'Fredoka',sans-serif", cursor:"pointer", boxShadow:"0 6px 20px rgba(192,122,80,0.35)", letterSpacing:"0.3px" }}
-                onMouseDown={e=>(e.currentTarget.style.transform="scale(0.96)")}
-                onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
-                onTouchStart={e=>(e.currentTarget.style.transform="scale(0.96)")}
-                onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
-              >
-                ขอบคุณหมีเนยนะ 🌸
-              </button>
+              {/* Decorative divider */}
+              <div style={{ display:"flex", alignItems:"center", gap:10, padding:"0 24px", marginBottom:18 }}>
+                <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(210,160,110,0.35),transparent)" }}/>
+                <span style={{ fontSize:14, opacity:0.6 }}>🌷</span>
+                <div style={{ flex:1, height:1, background:"linear-gradient(90deg,transparent,rgba(210,160,110,0.35),transparent)" }}/>
+              </div>
+
+              {/* Close button */}
+              <div style={{ padding:"0 18px" }}>
+                <button
+                  onClick={() => setShowPeriodPage(false)}
+                  className="period-close-btn"
+                  style={{
+                    width:"100%",
+                    color:"#fff",
+                    border:"none",
+                    borderRadius:999,
+                    padding:"14px 24px",
+                    fontSize:15,
+                    fontWeight:600,
+                    fontFamily:"'Fredoka',sans-serif",
+                    cursor:"pointer",
+                    letterSpacing:"0.3px",
+                    boxShadow:"0 8px 24px rgba(192,100,60,0.32), 0 2px 8px rgba(192,100,60,0.18)",
+                  }}
+                  onMouseDown={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                  onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
+                  onTouchStart={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                  onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
+                >
+                  ขอบคุณหมีเนยนะ 🌸
+                </button>
+              </div>
 
             </div>
           </div>
@@ -551,10 +620,8 @@ export default function Home() {
             <div style={{ textAlign:"center", marginBottom:2 }}>
               <span style={{ background:"rgba(200,155,118,0.15)", color:"#B07D62", fontSize:11, padding:"4px 14px", borderRadius:999, fontWeight:500 }}>{thaiDate}</span>
             </div>
-
             <BubbleMessage img="/bear2.png" text="สวัสดีคนเก่งของหมีเนย 🧸" isFirst />
             {chat.map(msg => <BubbleMessage key={msg.id} img="/bear2.png" text={msg.text} />)}
-
             {isTyping && (
               <div className="bubble-anim" style={{ display:"flex", gap:10, alignItems:"flex-end" }}>
                 <Image src="/bear2.png" width={36} height={36} alt="bear" style={{ borderRadius:"50%", flexShrink:0 }} />
@@ -568,8 +635,7 @@ export default function Home() {
 
           {/* ── BEAR (tappable) ── */}
           <div style={{ position:"absolute", bottom:170, right:12, zIndex:20, cursor:"pointer", userSelect:"none" }}
-            onClick={handleBearTap}
-            onTouchStart={handleBearTap}
+            onClick={handleBearTap} onTouchStart={handleBearTap}
           >
             <div className={`${bearShake ? "bear-shake" : bearBounce ? "bear-bounce" : "bear-bob"}`} style={{ transformOrigin:"center bottom" }}>
               <Image src="/bear.png" width={100} height={100} alt="bear" style={{ filter:"drop-shadow(0 8px 20px rgba(180,120,80,0.3))" }} />
@@ -577,35 +643,38 @@ export default function Home() {
             <div style={{ textAlign:"center", fontSize:9, color:"#C89B76", marginTop:-4, opacity:0.7, letterSpacing:"0.5px" }}>แตะได้นะ 🐾</div>
           </div>
 
-          {/* ── PERIOD BUTTON (bottom-left) ── */}
+          {/* ── ✨ MYSTERIOUS BUTTON (bottom-left) ── */}
           <button
-            onClick={() => { setShowPeriodPage(true); playPopupSound(); }}
-            className="period-btn-glow"
+            onClick={() => {
+              setShowPeriodPage(true);
+              playPopupSound();
+              setBtnSparkle(true);
+              setTimeout(() => setBtnSparkle(false), 600);
+            }}
+            className="mysterious-btn"
             style={{
               position:"absolute",
               bottom:175,
               left:14,
               zIndex:20,
-              width:42,
-              height:42,
+              width:44,
+              height:44,
               borderRadius:"50%",
-              background:"linear-gradient(135deg,#FFD6C0,#F5B89A)",
-              border:"2px solid rgba(255,200,170,0.8)",
+              background:"linear-gradient(135deg,#FFE9A0,#FFD060,#FFC040)",
+              border:"2px solid rgba(255,230,130,0.85)",
               cursor:"pointer",
               display:"flex",
               alignItems:"center",
               justifyContent:"center",
-              fontSize:20,
-              boxShadow:"0 4px 14px rgba(200,120,90,0.3)",
               transition:"transform 0.15s",
             }}
-            onMouseDown={e=>(e.currentTarget.style.transform="scale(0.9)")}
+            onMouseDown={e=>(e.currentTarget.style.transform="scale(0.88)")}
             onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
-            onTouchStart={e=>(e.currentTarget.style.transform="scale(0.9)")}
+            onTouchStart={e=>(e.currentTarget.style.transform="scale(0.88)")}
             onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
-            title="สำหรับวันที่รู้สึกหนัก 🧸"
+            title="มีอะไรอยากบอก 🧸"
           >
-            💌
+            <span className="star-icon">✨</span>
           </button>
 
           {/* ── BOTTOM ZONE ── */}
