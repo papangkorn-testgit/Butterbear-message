@@ -40,6 +40,7 @@ export default function Home() {
   };
   const [showSpecialPopup, setShowSpecialPopup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => !isSpecialTime());
+  const [showPeriodPage, setShowPeriodPage] = useState(false);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [isPressed, setIsPressed] = useState(false);
   const [msgCounter, setMsgCounter] = useState(0);
@@ -53,6 +54,7 @@ export default function Home() {
   const [bearPops, setBearPops] = useState<BearPop[]>([]);
   const [bearBounce, setBearBounce] = useState(false);
   const [bearShake, setBearShake] = useState(false);
+  const [periodBearBounce, setPeriodBearBounce] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -131,7 +133,6 @@ export default function Home() {
   const playMessageSound = useCallback(() => {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      // เสียง pop แบบแชท — sine wave สั้นๆ fade out
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
@@ -152,8 +153,6 @@ export default function Home() {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const now = ctx.currentTime;
-
-      // โน้ต 2 ตัว เหมือน xylophone เบาๆ
       [[1046, 0], [1318, 0.12]].forEach(([freq, delay]) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -176,24 +175,18 @@ export default function Home() {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       const now = ctx.currentTime;
-
-      // boing — เสียงสปริงกระเด้ง
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.type = "sine";
-      // pitch ขึ้นแล้วลงแบบ boing
       osc.frequency.setValueAtTime(300, now);
       osc.frequency.exponentialRampToValueAtTime(680, now + 0.06);
       osc.frequency.exponentialRampToValueAtTime(420, now + 0.18);
       osc.frequency.exponentialRampToValueAtTime(380, now + 0.32);
-
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
       osc.start(now);
       osc.stop(now + 0.35);
       osc.onended = () => ctx.close();
@@ -203,23 +196,47 @@ export default function Home() {
   // ── Bear tap ──
   const handleBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-
     setBearBounce(true);
     setTimeout(() => setBearBounce(false), 600);
     playBearSound();
-
     if (Math.random() < 0.25) {
       setBearShake(true);
       setTimeout(() => setBearShake(false), 500);
     }
-
     let cx = 0, cy = 0;
     if ("touches" in e && e.touches.length > 0) {
       cx = e.touches[0].clientX; cy = e.touches[0].clientY;
     } else if ("clientX" in e) {
       cx = e.clientX; cy = e.clientY;
     }
+    const count = 3 + Math.floor(Math.random() * 3);
+    const newPops: BearPop[] = Array.from({ length: count }, () => {
+      bearPopIdRef.current += 1;
+      return {
+        id: bearPopIdRef.current,
+        x: cx + (Math.random() - 0.5) * 70,
+        y: cy - 10 + (Math.random() - 0.5) * 40,
+        emoji: BEAR_REACTIONS[Math.floor(Math.random() * BEAR_REACTIONS.length)],
+      };
+    });
+    setBearPops(prev => [...prev, ...newPops]);
+    setTimeout(() => {
+      setBearPops(prev => prev.filter(p => !newPops.find(n => n.id === p.id)));
+    }, 1000);
+  }, []);
 
+  // ── Period bear tap (in overlay) ──
+  const handlePeriodBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setPeriodBearBounce(true);
+    setTimeout(() => setPeriodBearBounce(false), 600);
+    playBearSound();
+    let cx = 0, cy = 0;
+    if ("touches" in e && e.touches.length > 0) {
+      cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+    } else if ("clientX" in e) {
+      cx = e.clientX; cy = e.clientY;
+    }
     const count = 3 + Math.floor(Math.random() * 3);
     const newPops: BearPop[] = Array.from({ length: count }, () => {
       bearPopIdRef.current += 1;
@@ -269,13 +286,17 @@ export default function Home() {
         .welcome-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;pointer-events:none; }
         .welcome-overlay { position:fixed;inset:0;background:rgba(255,235,215,0.7);backdrop-filter:blur(6px);z-index:99; }
 
-        /* Special popup */
         @keyframes specialPopIn { 0%{opacity:0;transform:translate(-50%,-50%) scale(0.6) rotate(-3deg)} 65%{transform:translate(-50%,-50%) scale(1.06) rotate(1deg)} 100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)} }
         .special-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:110;animation:specialPopIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards; }
         @keyframes heartFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-6px) scale(1.1)} }
         .heart-float { animation:heartFloat 1.8s ease-in-out infinite; }
         @keyframes shimmerBtn { 0%{background-position:200% center} 100%{background-position:-200% center} }
         .special-btn { background:linear-gradient(90deg,#D4A07A,#E8B98A,#C07A50,#D4A07A);background-size:300% auto;animation:shimmerBtn 2.5s linear infinite; }
+
+        /* Period page overlay */
+        @keyframes periodSlideIn { 0%{opacity:0;transform:translateY(40px) scale(0.96)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+        .period-overlay { position:fixed;inset:0;z-index:200;background:rgba(255,225,200,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center; }
+        .period-card { animation:periodSlideIn 0.5s cubic-bezier(0.34,1.3,0.64,1) forwards; }
 
         @keyframes floatSparkle { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.5} 50%{transform:translateY(-18px) rotate(15deg);opacity:1} }
         .sparkle { position:absolute;animation:floatSparkle var(--dur) ease-in-out infinite;animation-delay:var(--delay);pointer-events:none;user-select:none; }
@@ -301,7 +322,6 @@ export default function Home() {
         @keyframes blinkColon { 0%,100%{opacity:1} 50%{opacity:0.15} }
         .blink { animation:blinkColon 1s step-end infinite; }
 
-        /* Bear animations */
         @keyframes bearBob { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-6px) rotate(1deg)} }
         .bear-bob { animation:bearBob 3s ease-in-out infinite; }
 
@@ -311,11 +331,9 @@ export default function Home() {
         @keyframes bearShakeAnim { 0%,100%{transform:rotate(0deg)} 20%{transform:rotate(-8deg) scale(1.05)} 40%{transform:rotate(8deg) scale(1.05)} 60%{transform:rotate(-5deg)} 80%{transform:rotate(5deg)} }
         .bear-shake { animation:bearShakeAnim 0.5s ease forwards !important; }
 
-        /* Float-up pop emojis */
         @keyframes floatUp { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-70px) scale(1.4)} }
         .bear-pop { position:fixed;pointer-events:none;z-index:999;font-size:22px;animation:floatUp 0.9s ease-out forwards; }
 
-        /* Music bars */
         @keyframes musicBarA{0%,100%{height:4px}50%{height:14px}} @keyframes musicBarB{0%,100%{height:10px}50%{height:4px}} @keyframes musicBarC{0%,100%{height:7px}50%{height:16px}}
         .music-bar-a{animation:musicBarA 0.7s ease-in-out infinite} .music-bar-b{animation:musicBarB 0.9s ease-in-out infinite} .music-bar-c{animation:musicBarC 0.6s ease-in-out infinite}
 
@@ -331,6 +349,14 @@ export default function Home() {
 
         .safe-bottom { padding-bottom:max(16px,env(safe-area-inset-bottom,16px)); }
 
+        /* Period button pulse */
+        @keyframes periodBtnGlow { 0%,100%{box-shadow:0 0 0 0 rgba(220,150,130,0.45)} 50%{box-shadow:0 0 0 8px rgba(220,150,130,0)} }
+        .period-btn-glow { animation:periodBtnGlow 2.5s ease-in-out infinite; }
+
+        /* Message lines fade in staggered */
+        @keyframes msgFadeIn { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+        .msg-line { animation:msgFadeIn 0.5s ease forwards; }
+
         @media(min-width:480px){
           .phone-card{height:min(860px,95dvh) !important;border-radius:44px !important;border:5px solid #F4DECE !important;}
         }
@@ -341,6 +367,91 @@ export default function Home() {
         <div key={p.id} className="bear-pop" style={{ left: p.x, top: p.y }}>{p.emoji}</div>
       ))}
 
+      {/* ── PERIOD PAGE OVERLAY ── */}
+      {showPeriodPage && (
+        <div className="period-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPeriodPage(false); }}>
+          <div className="period-card" style={{ width:"min(340px, calc(100vw - 32px))", maxHeight:"90dvh", overflowY:"auto" }}>
+            <div style={{ background:"linear-gradient(160deg,#FFF5EE,#FFE8D8)", borderRadius:32, padding:"28px 24px 28px", border:"2px solid #F5C4A5", boxShadow:"0 30px 80px rgba(180,90,60,0.22)", position:"relative", overflow:"hidden" }}>
+
+              {/* bg deco */}
+              <div style={{ position:"absolute", top:-20, right:-16, fontSize:80, opacity:0.06, pointerEvents:"none", transform:"rotate(15deg)" }}>🧸</div>
+              <div style={{ position:"absolute", bottom:-16, left:-12, fontSize:64, opacity:0.06, pointerEvents:"none", transform:"rotate(-20deg)" }}>💛</div>
+              <div style={{ position:"absolute", top:"40%", left:-10, fontSize:40, opacity:0.05, pointerEvents:"none" }}>🌸</div>
+
+              {/* close button */}
+              <button
+                onClick={() => setShowPeriodPage(false)}
+                style={{ position:"absolute", top:14, right:14, width:28, height:28, borderRadius:"50%", background:"rgba(200,140,110,0.15)", border:"none", cursor:"pointer", fontSize:14, display:"flex", alignItems:"center", justifyContent:"center", color:"#B07D62" }}
+              >✕</button>
+
+              {/* bear image */}
+              <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
+                <div
+                  className={periodBearBounce ? "bear-bounce" : "heart-float"}
+                  onClick={handlePeriodBearTap}
+                  onTouchStart={handlePeriodBearTap}
+                  style={{ cursor:"pointer", transformOrigin:"center bottom" }}
+                >
+                  <Image
+                    src="/bear2.png"
+                    width={88}
+                    height={88}
+                    alt="butterbear"
+                    style={{ borderRadius:"50%", border:"3px solid #FFD9B8", boxShadow:"0 10px 30px rgba(180,100,50,0.22)", display:"block" }}
+                  />
+                </div>
+              </div>
+
+              {/* title */}
+              <div style={{ textAlign:"center", fontSize:18, color:"#7A4F2E", fontWeight:600, marginBottom:16, lineHeight:1.4 }}>
+                หมีเนยเข้าใจนะ 🧸💛
+              </div>
+
+              {/* message lines */}
+              <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom:20 }}>
+                {[
+                  { delay:"0s",   text:"ช่วงนี้ที่พี่เป็นแบบนี้อยู่ หมีเนยเข้าใจนะ 🥺" },
+                  { delay:"0.1s", text:"มันไม่ใช่ความผิดของพี่เลย ร่างกายมันเป็นแบบนั้นเอง" },
+                  { delay:"0.2s", text:"พี่อยากอยู่คนเดียวก็ได้นะ ไม่ต้องรู้สึกผิดเลย 🌸" },
+                  { delay:"0.3s", text:"แล้วถ้าพี่พร้อมแล้ว ไม่ว่าจะอยากเล่นเกมด้วยกัน\nหรือแค่อยากคุย มีหมีเนยอยู่ตรงนี้เสมอนะ 💛" },
+                  { delay:"0.4s", text:"รอได้นะ ไม่ไปไหนเลย 🧸" },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="msg-line"
+                    style={{
+                      animationDelay: item.delay,
+                      background: i % 2 === 0 ? "rgba(255,240,225,0.8)" : "rgba(255,230,210,0.6)",
+                      borderRadius:16,
+                      padding:"11px 15px",
+                      fontSize:13.5,
+                      color:"#8B5E3C",
+                      lineHeight:1.7,
+                      border:"1px solid rgba(244,200,160,0.4)",
+                      whiteSpace:"pre-line",
+                    }}
+                  >
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+
+              {/* close button */}
+              <button
+                onClick={() => setShowPeriodPage(false)}
+                style={{ width:"100%", background:"linear-gradient(135deg,#D4A07A,#C07A50)", color:"#fff", border:"none", borderRadius:999, padding:"13px 24px", fontSize:15, fontWeight:600, fontFamily:"'Fredoka',sans-serif", cursor:"pointer", boxShadow:"0 6px 20px rgba(192,122,80,0.35)", letterSpacing:"0.3px" }}
+                onMouseDown={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
+                onTouchStart={e=>(e.currentTarget.style.transform="scale(0.96)")}
+                onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
+              >
+                ขอบคุณหมีเนยนะ 🌸
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Special popup — วันที่ 26 */}
       {showSpecialPopup && (
@@ -348,51 +459,28 @@ export default function Home() {
           <div className="welcome-overlay" style={{ zIndex:109, background:"rgba(255,225,200,0.75)" }} />
           <div className="special-popup">
             <div style={{ background:"linear-gradient(145deg,#FFF8F0,#FFE8D0)", borderRadius:32, padding:"28px 24px 24px", textAlign:"center", border:"2.5px solid #F5C9A0", boxShadow:"0 24px 70px rgba(180,100,50,0.28)", width:"min(300px, calc(100vw - 48px))", position:"relative", overflow:"hidden" }}>
-
-              {/* bg deco */}
               <div style={{ position:"absolute", top:-18, right:-18, fontSize:60, opacity:0.08, transform:"rotate(20deg)", pointerEvents:"none" }}>🧸</div>
               <div style={{ position:"absolute", bottom:-14, left:-14, fontSize:50, opacity:0.08, transform:"rotate(-15deg)", pointerEvents:"none" }}>💛</div>
-
-              {/* bear2 image — tappable */}
               <div className="heart-float" style={{ marginBottom:12, display:"flex", justifyContent:"center" }}>
-                <div
-                  onClick={handleBearTap}
-                  onTouchStart={handleBearTap}
-                  style={{ cursor:"pointer", borderRadius:"50%", display:"inline-block" }}
-                >
+                <div onClick={handleBearTap} onTouchStart={handleBearTap} style={{ cursor:"pointer", borderRadius:"50%", display:"inline-block" }}>
                   <Image src="/bear2.png" width={76} height={76} alt="butterbear" style={{ borderRadius:"50%", border:"3px solid #FFD9B8", boxShadow:"0 8px 24px rgba(180,100,50,0.18)", display:"block" }} />
                 </div>
               </div>
-
-              {/* title */}
-              <div style={{ fontSize:17, color:"#7A4F2E", fontWeight:600, marginBottom:10, lineHeight:1.5 }}>
-                วันนี้มีประชุมตอนเช้าใช่มั้ยแงง 🥺
-              </div>
-
-              {/* message */}
+              <div style={{ fontSize:17, color:"#7A4F2E", fontWeight:600, marginBottom:10, lineHeight:1.5 }}>วันนี้มีประชุมตอนเช้าใช่มั้ยแงง 🥺</div>
               <div style={{ fontSize:13, color:"#A06845", lineHeight:1.85, marginBottom:18 }}>
                 ไม่เป็นไรนะ~ หมีเนยอยู่ตรงนี้แล้ว 🧸<br/>
                 หายใจลึกๆ แล้วก็ไปได้เลย<br/>
                 <span style={{ fontSize:12, color:"#B8724A" }}>วันนี้ก็เก่งมากแล้วนะ ที่ลุกขึ้นมา 🌸</span>
               </div>
-
-              {/* button */}
               <button
-                onClick={() => {
-                  setShowSpecialPopup(false);
-                  setShowWelcome(true);
-                  setTimeout(() => setShowWelcome(false), 3000);
-                }}
+                onClick={() => { setShowSpecialPopup(false); setShowWelcome(true); setTimeout(() => setShowWelcome(false), 3000); }}
                 className="special-btn"
                 style={{ color:"#fff", border:"none", borderRadius:999, padding:"13px 32px", fontSize:15, fontWeight:600, fontFamily:"'Fredoka',sans-serif", cursor:"pointer", boxShadow:"0 6px 20px rgba(192,122,80,0.4)", letterSpacing:"0.3px", width:"100%" }}
                 onMouseDown={e=>(e.currentTarget.style.transform="scale(0.96)")}
                 onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
                 onTouchStart={e=>(e.currentTarget.style.transform="scale(0.96)")}
                 onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
-              >
-                พร้อมแล้วน้า 🧸💛
-              </button>
-
+              >พร้อมแล้วน้า 🧸💛</button>
             </div>
           </div>
         </>
@@ -478,20 +566,47 @@ export default function Home() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* ── BEAR (tappable, floats above bottom bar) ── */}
+          {/* ── BEAR (tappable) ── */}
           <div style={{ position:"absolute", bottom:170, right:12, zIndex:20, cursor:"pointer", userSelect:"none" }}
             onClick={handleBearTap}
             onTouchStart={handleBearTap}
           >
-            <div
-              className={`${bearShake ? "bear-shake" : bearBounce ? "bear-bounce" : "bear-bob"}`}
-              style={{ transformOrigin:"center bottom" }}
-            >
+            <div className={`${bearShake ? "bear-shake" : bearBounce ? "bear-bounce" : "bear-bob"}`} style={{ transformOrigin:"center bottom" }}>
               <Image src="/bear.png" width={100} height={100} alt="bear" style={{ filter:"drop-shadow(0 8px 20px rgba(180,120,80,0.3))" }} />
             </div>
-            {/* tap hint */}
             <div style={{ textAlign:"center", fontSize:9, color:"#C89B76", marginTop:-4, opacity:0.7, letterSpacing:"0.5px" }}>แตะได้นะ 🐾</div>
           </div>
+
+          {/* ── PERIOD BUTTON (bottom-left) ── */}
+          <button
+            onClick={() => { setShowPeriodPage(true); playPopupSound(); }}
+            className="period-btn-glow"
+            style={{
+              position:"absolute",
+              bottom:175,
+              left:14,
+              zIndex:20,
+              width:42,
+              height:42,
+              borderRadius:"50%",
+              background:"linear-gradient(135deg,#FFD6C0,#F5B89A)",
+              border:"2px solid rgba(255,200,170,0.8)",
+              cursor:"pointer",
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"center",
+              fontSize:20,
+              boxShadow:"0 4px 14px rgba(200,120,90,0.3)",
+              transition:"transform 0.15s",
+            }}
+            onMouseDown={e=>(e.currentTarget.style.transform="scale(0.9)")}
+            onMouseUp={e=>(e.currentTarget.style.transform="scale(1)")}
+            onTouchStart={e=>(e.currentTarget.style.transform="scale(0.9)")}
+            onTouchEnd={e=>(e.currentTarget.style.transform="scale(1)")}
+            title="สำหรับวันที่รู้สึกหนัก 🧸"
+          >
+            💌
+          </button>
 
           {/* ── BOTTOM ZONE ── */}
           <div className="safe-bottom" style={{ background:"linear-gradient(180deg,transparent 0%,#FFF8F2 22%)", paddingTop:8, paddingLeft:16, paddingRight:16, position:"relative", zIndex:10, flexShrink:0 }}>
@@ -512,34 +627,23 @@ export default function Home() {
 
             {/* ── MUSIC PLAYER ── */}
             <div style={{ background:"linear-gradient(135deg,rgba(255,240,220,0.97),rgba(255,225,195,0.97))", borderRadius:20, border:"1.5px solid rgba(244,200,160,0.6)", padding:"10px 14px 10px", boxShadow:"0 4px 16px rgba(180,120,80,0.12)" }}>
-
-              {/* Main row */}
               <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-                {/* Vinyl */}
                 <div style={{ width:38, height:38, borderRadius:"50%", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 3px 10px rgba(139,94,60,0.3)", position:"relative", overflow:"hidden", background:"#8B5E3C" }}>
                   <div className={isPlaying?"vinyl-spin":""} style={{ position:"absolute", inset:0, borderRadius:"50%", background:"conic-gradient(from 0deg,#7A4F2E 0%,#C89B76 25%,#8B5E3C 50%,#D4A07A 75%,#7A4F2E 100%)", opacity:0.85 }}/>
                   <div style={{ width:10,height:10,borderRadius:"50%",background:"#FFF5EC",border:"2px solid #D4A07A",position:"relative",zIndex:2 }}/>
                 </div>
-
-                {/* Info */}
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:12, fontWeight:600, color:"#7A4F2E", overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>กอดอุ่น (Warm Hugs)</div>
                   <div style={{ fontSize:10, color:"#B07D62" }}>BUTTERBEAR 🧸</div>
                 </div>
-
-                {/* EQ bars */}
                 <div style={{ display:"flex", alignItems:"flex-end", gap:2, height:16, opacity:isPlaying?1:0.25, transition:"opacity 0.3s", marginRight:2 }}>
                   {[{cls:"music-bar-a",h:4},{cls:"music-bar-b",h:10},{cls:"music-bar-c",h:7}].map(({cls,h},i)=>(
                     <div key={i} className={isPlaying?cls:""} style={{ width:3, height:isPlaying?undefined:h, background:"#C89B76", borderRadius:2 }}/>
                   ))}
                 </div>
-
-                {/* Volume */}
                 <button onClick={()=>setShowVolumeSlider(v=>!v)} style={{ background:showVolumeSlider?"rgba(200,155,118,0.2)":"transparent", border:"none", cursor:"pointer", fontSize:15, padding:"3px 5px", borderRadius:8 }}>
                   {volume===0?"🔇":volume<0.4?"🔉":"🔊"}
                 </button>
-
-                {/* Play/Pause */}
                 <button
                   onClick={togglePlay}
                   style={{ width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#D4A07A,#C07A50)",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:"0 3px 10px rgba(192,122,80,0.4)",transition:"transform 0.15s",flexShrink:0 }}
@@ -551,8 +655,6 @@ export default function Home() {
                   {isPlaying?"⏸":"▶️"}
                 </button>
               </div>
-
-              {/* Volume slider */}
               {showVolumeSlider && (
                 <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
                   <span style={{ fontSize:10, color:"#B07D62" }}>🔈</span>
@@ -560,8 +662,6 @@ export default function Home() {
                   <span style={{ fontSize:10, color:"#B07D62" }}>🔊</span>
                 </div>
               )}
-
-              {/* Progress */}
               <div style={{ display:"flex", alignItems:"center", gap:6 }}>
                 <span style={{ fontSize:10, color:"#B07D62", minWidth:28 }}>{formatTime(progress*duration)}</span>
                 <div className="progress-track" onClick={e=>{ const r=e.currentTarget.getBoundingClientRect(); seekTo((e.clientX-r.left)/r.width); }}>
@@ -571,7 +671,7 @@ export default function Home() {
               </div>
             </div>
 
-          </div>{/* end bottom zone */}
+          </div>
         </div>
       </main>
     </>
