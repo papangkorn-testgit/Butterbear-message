@@ -20,29 +20,29 @@ const PLAYLIST = [
 ];
 
 const MESSAGES = [
-  "เที่ยวให้สนุกนะ 🧸",
-  "ถ่ายรูปสวยๆ มาอวดหมีเนยด้วยนะ 📸",
-  "เดินทางปลอดภัยนะะ 💛",
+  "วันนี้ก็สู้ๆ กับงานนะ 🧸",
+  "ขอให้วันนี้งานไม่หนักนะแงง 🧸",
+  "พักเบรกถ่ายรูปอะไรน่ารักๆ มาอวดหมีเนยบ้างก็ได้นะ 📸",
+  "เดินทางไปทำงานปลอดภัยนะ 💛",
   "วันนี้ท้องฟ้าสวยเหมือนคนอ่านเลย ☁️",
-  "หมีเนยรอรูปวิวอยู่น้า 🌷",
+  "หมีเนยรอเป็นกำลังใจช่วงพักเบรกนะ 🌷",
   "แวะกินของอร่อยด้วยนะ 🍜",
-  "อย่าลืมพักเหนื่อยระหว่างทางนะ 🌿",
-  "เก็บความทรงจำดีๆ กลับมาด้วยน้า ✨",
+  "อย่าลืมพักสายตา พักมือบ้างนะ 🌿",
+  "วันนี้ผ่านไปได้ก็เก่งมากแล้วนะ ✨",
   "ส่งกำลังใจให้คนเก่ง 💖",
   "หมีเนยรักนะ 🍯",
-  "เที่ยวเผื่อหมีเนยด้วยย 🐻",
+  "ทำงานเหนื่อยๆ ก็พักบ้างนะ 🐻",
   "อย่าลืมดูแลตัวเองด้วยนะ",
-  "ถ้าเจอทะเล ฝากบอกว่าหมีเนยคิดถึง 🌊",
   "อย่าลืมดื่มน้ำด้วยนะ 💧",
   "ยิ้มหน่อยนะ สวยอยู่แล้ว 🌸",
-  "ขอให้ทริปนี้เต็มไปด้วยเสียงหัวเราะ 😊",
+  "ขอให้วันนี้มีเรื่องน่ายิ้มบ้างนะ 😊",
   "มีหมีเนยอยู่ข้างๆตลอดนะ 💛",
-  "มีหมีเนยคอยเอาใจช่วยทุกกิโลเมตรเลยนะ 🧸",
-  "วันนี้เป็นนักท่องเที่ยวคนเก่งนะ ✨",
-  "วิวสวยแค่ไหนก็สู้รอยยิ้มเธอไม่ได้ 🌸",
+  "มีหมีเนยคอยเอาใจช่วยทุกเคสเลยนะ 🧸",
+  "วันนี้ก็เป็นคนเก่งของหมีเนยเหมือนเดิมนะ ✨",
+  "งานเยอะแค่ไหนก็สู้รอยยิ้มเธอไม่ได้ 🌸",
 ];
 
-const BEAR_REACTIONS = ["🧸", "💛", "🌸", "✨", "🍯", "💕", "🌷", "⭐"];
+const BEAR_REACTIONS = ["🧸", "💛", "🎵", "✨", "🍯", "💕", "🎶", "⭐"];
 
 interface Sparkle    { id: number; x: number; y: number; size: number; duration: number; delay: number; emoji: string; }
 interface ChatMessage { id: number; text: string; }
@@ -64,7 +64,7 @@ function BearImage({
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           width, height, fontSize: width * 0.6,
           borderRadius: style?.borderRadius ?? "50%",
-          background: "#FFE0C2", ...style,
+          background: "#FFE9B8", ...style,
         }}
         className={className}
       >🧸</span>
@@ -116,7 +116,7 @@ export default function Home() {
   const usedIndexes   = useRef<number[]>([]);
   const bearPopIdRef  = useRef(0);
 
-  const SPARKLE_EMOJIS = ["✨", "🌸", "💕", "⭐", "🍯", "🌷", "💛"];
+  const SPARKLE_EMOJIS = ["✨", "🎵", "💕", "⭐", "🍯", "🎶", "💛"];
 
   // ─── Clock ───
   useEffect(() => {
@@ -321,35 +321,40 @@ export default function Home() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
           font-family: 'Fredoka', sans-serif;
-          background: #FFF0E4;
+          background: #FFF7E3;
           overflow: hidden;
           -webkit-tap-highlight-color: transparent;
         }
         :root {
-          --clr-bg:       #FFF0E4;
-          --clr-card:     #FFFCF8;
-          --clr-header:   #FFE0C2;
-          --clr-header2:  #FECFAE;
-          --clr-border:   #F5D3BB;
-          --clr-bubble:   #FFF0E0;
-          --clr-bubble1:  #FFECD8;
-          --clr-btn:      #D4A07A;
-          --clr-btn2:     #C07A50;
-          --clr-text-h:   #7A4F2E;
-          --clr-text-s:   #B07D62;
-          --clr-text-m:   #C89B76;
-          --clr-accent:   #5CB85C;
-          --clr-period-h: #FDDCBF;
-          --clr-period-h2:#FBCAAA;
-          --clr-period-h3:#F9BCA0;
+          /* ── Buttercream + checkerboard-garden palette ── */
+          --clr-bg:       #FFF7E3;
+          --clr-card:     #FFFDF5;
+          --clr-header:   #FFEFC4;
+          --clr-header2:  #FFE2A8;
+          --clr-border:   #F3DDAE;
+          --clr-bubble:   #FFF4DE;
+          --clr-bubble1:  #FBEFD2;
+          --clr-btn:      #5C9C82;
+          --clr-btn2:     #3F7A63;
+          --clr-text-h:   #6E4A2E;
+          --clr-text-s:   #B2865E;
+          --clr-text-m:   #CDA978;
+          --clr-accent:   #5C9C82;
+          --clr-period-h: #CFE8D6;
+          --clr-period-h2:#AFD9C2;
+          --clr-period-h3:#8FC6AE;
+          --clr-sky:      #7BC4E0;
+          --clr-pink:     #F498A8;
+          --clr-check-a:  #FFFDF5;
+          --clr-check-b:  #3F7A63;
         }
         .bg-dots {
-          background-color: #FFF7EF;
-          background-image: radial-gradient(circle, #F5C9A8 1px, transparent 1px);
+          background-color: #FFFAEE;
+          background-image: radial-gradient(circle, #F2DDAE 1px, transparent 1px);
           background-size: 28px 28px;
         }
         @keyframes popIn {
@@ -358,7 +363,7 @@ export default function Home() {
           100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
         }
         .welcome-popup  { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 100; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; pointer-events: none; }
-        .welcome-overlay { position: fixed; inset: 0; background: rgba(255,235,215,0.7); backdrop-filter: blur(6px); z-index: 99; }
+        .welcome-overlay { position: fixed; inset: 0; background: rgba(255,239,200,0.7); backdrop-filter: blur(6px); z-index: 99; }
         @keyframes specialPopIn {
           0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.6) rotate(-3deg); }
           65%  { transform: translate(-50%,-50%) scale(1.06) rotate(1deg); }
@@ -369,12 +374,12 @@ export default function Home() {
         .heart-float { animation: heartFloat 1.8s ease-in-out infinite; }
         @keyframes shimmerBtn { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
         .special-btn {
-          background: linear-gradient(90deg, #D4A07A, #E8B98A, #C07A50, #D4A07A);
+          background: linear-gradient(90deg, var(--clr-btn2), #6FB596, var(--clr-btn), var(--clr-btn2));
           background-size: 300% auto;
           animation: shimmerBtn 2.5s linear infinite;
         }
         @keyframes periodSlideIn { 0% { opacity: 0; transform: translateY(50px) scale(0.94); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .period-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(255,230,210,0.82); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; }
+        .period-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(220,238,228,0.82); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; }
         .period-card    { animation: periodSlideIn 0.55s cubic-bezier(0.34,1.3,0.64,1) forwards; }
         @keyframes floatSparkle { 0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.5; } 50% { transform: translateY(-18px) rotate(15deg); opacity: 1; } }
         .sparkle { position: absolute; animation: floatSparkle var(--dur) ease-in-out infinite; animation-delay: var(--delay); pointer-events: none; user-select: none; }
@@ -384,13 +389,13 @@ export default function Home() {
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bubblePop { 0% { opacity: 0; transform: translateY(12px) scale(0.85); } 60% { transform: translateY(-3px) scale(1.03); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         .bubble-anim { animation: bubblePop 0.45s cubic-bezier(0.34,1.4,0.64,1) forwards; }
-        @keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(200,155,118,0.5); } 70% { box-shadow: 0 0 0 16px rgba(200,155,118,0); } 100% { box-shadow: 0 0 0 0 rgba(200,155,118,0); } }
+        @keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(63,122,99,0.45); } 70% { box-shadow: 0 0 0 16px rgba(63,122,99,0); } 100% { box-shadow: 0 0 0 0 rgba(63,122,99,0); } }
         .btn-pulse { animation: btnPulse 0.5s ease; }
         .chat-area::-webkit-scrollbar       { width: 4px; }
         .chat-area::-webkit-scrollbar-track { background: transparent; }
-        .chat-area::-webkit-scrollbar-thumb { background: #E8C9B0; border-radius: 999px; }
+        .chat-area::-webkit-scrollbar-thumb { background: #EFD9A8; border-radius: 999px; }
         .chat-area { scroll-behavior: smooth; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(180,120,80,0.08), 0 20px 60px -10px rgba(180,120,80,0.18); }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(110,74,46,0.08), 0 20px 60px -10px rgba(110,74,46,0.18); }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
         .online-dot { animation: pulse 2s ease-in-out infinite; }
         @keyframes blinkColon { 0%,100% { opacity: 1; } 50% { opacity: 0.15; } }
@@ -411,59 +416,88 @@ export default function Home() {
         .music-bar-c { animation: musicBarC 0.6s ease-in-out infinite; }
         @keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .vinyl-spin { animation: vinylSpin 4s linear infinite; }
-        .progress-track { width: 100%; height: 4px; background: rgba(200,155,118,0.25); border-radius: 999px; cursor: pointer; position: relative; }
-        .progress-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #D4A07A, #C07A50); position: relative; }
-        .progress-fill::after { content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: #C07A50; box-shadow: 0 0 6px rgba(192,122,80,0.5); }
-        .vol-slider { -webkit-appearance: none; appearance: none; height: 3px; border-radius: 999px; background: linear-gradient(90deg, #C07A50 var(--vol), rgba(200,155,118,0.3) var(--vol)); outline: none; width: 100%; }
-        .vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #C07A50; cursor: pointer; }
+        .progress-track { width: 100%; height: 4px; background: rgba(63,122,99,0.18); border-radius: 999px; cursor: pointer; position: relative; }
+        .progress-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--clr-btn), var(--clr-btn2)); position: relative; }
+        .progress-fill::after { content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--clr-btn2); box-shadow: 0 0 6px rgba(63,122,99,0.5); }
+        .vol-slider { -webkit-appearance: none; appearance: none; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--clr-btn2) var(--vol), rgba(63,122,99,0.22) var(--vol)); outline: none; width: 100%; }
+        .vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--clr-btn2); cursor: pointer; }
         .safe-bottom { padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)); }
         @keyframes mysteriousGlow {
-          0%,100% { box-shadow: 0 0 8px 2px rgba(255,210,120,0.35), 0 4px 14px rgba(200,120,90,0.28); }
-          50%      { box-shadow: 0 0 18px 6px rgba(255,220,140,0.55), 0 6px 20px rgba(200,120,90,0.38); }
+          0%,100% { box-shadow: 0 0 8px 2px rgba(140,205,180,0.35), 0 4px 14px rgba(90,140,115,0.28); }
+          50%      { box-shadow: 0 0 18px 6px rgba(150,215,190,0.55), 0 6px 20px rgba(90,140,115,0.38); }
         }
         @keyframes starOrbit { 0% { transform: rotate(0deg) translateX(14px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(14px) rotate(-360deg); } }
         @keyframes starTwinkle { 0%,100% { opacity: 1; transform: scale(1) rotate(0deg); } 30% { opacity: 0.6; transform: scale(0.8) rotate(-15deg); } 60% { opacity: 1; transform: scale(1.2) rotate(10deg); } }
         .mysterious-btn { animation: mysteriousGlow 2.2s ease-in-out infinite; position: relative; overflow: visible !important; }
-        .mysterious-btn .star-icon { animation: starTwinkle 1.6s ease-in-out infinite; display: inline-block; font-size: 19px; filter: drop-shadow(0 0 4px rgba(255,230,100,0.8)); }
-        .mysterious-btn::before { content: '⭐'; position: absolute; font-size: 8px; top: 50%; left: 50%; animation: starOrbit 2.4s linear infinite; pointer-events: none; opacity: 0.85; transform-origin: 0 0; }
-        .mysterious-btn::after  { content: '✦'; position: absolute; font-size: 7px; top: 50%; left: 50%; animation: starOrbit 3.2s linear infinite reverse; pointer-events: none; opacity: 0.7; color: #FFD700; transform-origin: 0 0; }
+        .mysterious-btn .star-icon { animation: starTwinkle 1.6s ease-in-out infinite; display: inline-block; font-size: 19px; filter: drop-shadow(0 0 4px rgba(180,235,210,0.9)); }
+        .mysterious-btn::before { content: '🎵'; position: absolute; font-size: 9px; top: 50%; left: 50%; animation: starOrbit 2.4s linear infinite; pointer-events: none; opacity: 0.9; transform-origin: 0 0; }
+        .mysterious-btn::after  { content: '✦'; position: absolute; font-size: 7px; top: 50%; left: 50%; animation: starOrbit 3.2s linear infinite reverse; pointer-events: none; opacity: 0.75; color: var(--clr-btn2); transform-origin: 0 0; }
         .mysterious-tooltip {
           position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
-          background: rgba(122,79,46,0.92); color: #FFF5EC; font-size: 11px;
+          background: rgba(63,122,99,0.92); color: #FFF9EC; font-size: 11px;
           font-family: 'Fredoka', sans-serif; white-space: nowrap; padding: 5px 12px;
           border-radius: 999px; pointer-events: none; animation: tooltipFade 0.2s ease; z-index: 30;
         }
-        .mysterious-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: rgba(122,79,46,0.92); }
+        .mysterious-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: rgba(63,122,99,0.92); }
         @keyframes tooltipFade { from { opacity: 0; transform: translateX(-50%) translateY(4px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes msgFadeSlide { 0% { opacity: 0; transform: translateY(10px) scale(0.97); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         .msg-line { animation: msgFadeSlide 0.55s cubic-bezier(0.34,1.3,0.64,1) forwards; opacity: 0; }
         @keyframes periodBtnShimmer { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
-        .period-close-btn { background: linear-gradient(90deg,#E8A87C,#D4814E,#C9724A,#E09870,#E8A87C); background-size: 300% auto; animation: periodBtnShimmer 3s linear infinite; }
+        .period-close-btn { background: linear-gradient(90deg,var(--clr-btn2),#56A483,#3F7A63,#5CB592,var(--clr-btn2)); background-size: 300% auto; animation: periodBtnShimmer 3s linear infinite; }
 
         /* ── Track switch animation ── */
         @keyframes trackSlideIn { 0% { opacity: 0; transform: translateX(10px); } 100% { opacity: 1; transform: translateX(0); } }
         .track-name-anim { animation: trackSlideIn 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards; }
 
         /* ── Track dot indicators ── */
-        .track-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(200,155,118,0.3); transition: all 0.3s ease; }
-        .track-dot.active { background: #C07A50; width: 14px; border-radius: 999px; }
+        .track-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(63,122,99,0.25); transition: all 0.3s ease; }
+        .track-dot.active { background: var(--clr-btn2); width: 14px; border-radius: 999px; }
 
         /* ── Nav button ── */
         .nav-btn {
-          background: rgba(200,155,118,0.15); border: none; cursor: pointer;
+          background: rgba(63,122,99,0.12); border: none; cursor: pointer;
           width: 28px; height: 28px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-size: 12px; color: var(--clr-text-s);
+          font-size: 12px; color: var(--clr-btn2);
           transition: background 0.15s, transform 0.15s;
           flex-shrink: 0;
         }
-        .nav-btn:hover { background: rgba(200,155,118,0.28); }
+        .nav-btn:hover { background: rgba(63,122,99,0.22); }
         .nav-btn:active { transform: scale(0.88); }
 
-        @media(min-width: 480px) {
-          .phone-card { height: min(860px, 95dvh) !important; border-radius: 44px !important; border: 5px solid #F4DECE !important; }
+        /* ── Checkerboard ribbon (nod to Butterbear's storybook floor) ── */
+        .checker-ribbon {
+          height: 7px; width: 100%; flex-shrink: 0;
+          background-image:
+            linear-gradient(45deg, var(--clr-check-b) 25%, transparent 25%, transparent 75%, var(--clr-check-b) 75%),
+            linear-gradient(45deg, var(--clr-check-b) 25%, transparent 25%, transparent 75%, var(--clr-check-b) 75%);
+          background-size: 14px 14px;
+          background-position: 0 0, 7px 7px;
+          background-color: var(--clr-check-a);
+          opacity: 0.55;
         }
-        button:focus-visible, [role="button"]:focus-visible { outline: 2px solid #C07A50; outline-offset: 2px; }
+
+        /* ── Music note float (signature motif) ── */
+        @keyframes noteFloat {
+          0%   { transform: translateY(0) rotate(-6deg); opacity: 0.0; }
+          12%  { opacity: 0.85; }
+          50%  { transform: translateY(-26px) rotate(8deg); }
+          88%  { opacity: 0.85; }
+          100% { transform: translateY(-52px) rotate(-4deg); opacity: 0; }
+        }
+        .note-float { position: absolute; pointer-events: none; animation: noteFloat 4.5s ease-in-out infinite; font-size: 16px; }
+
+        /* iPhone 14 (390 x 844) tuned spacing */
+        @media (max-width: 430px) {
+          .phone-card { border-radius: 0 !important; }
+          .header-title { font-size: 18px !important; }
+          .cta-btn { font-size: 15px !important; padding: 13px 22px !important; }
+        }
+
+        @media(min-width: 480px) {
+          .phone-card { height: min(860px, 95dvh) !important; border-radius: 44px !important; border: 5px solid #F4E6C6 !important; }
+        }
+        button:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--clr-btn2); outline-offset: 2px; }
       `}</style>
 
       {/* Bear pop floats */}
@@ -480,10 +514,10 @@ export default function Home() {
         >
           <div className="period-card" style={{ width: "min(348px, calc(100vw - 28px))", maxHeight: "92dvh", overflowY: "auto" }}>
             <div style={{
-              background: "linear-gradient(160deg,#FFF8F2 0%,#FFF0E2 50%,#FFE8D4 100%)",
+              background: "linear-gradient(160deg,#FFFDF6 0%,#FFF6E2 50%,#F2EAD3 100%)",
               borderRadius: 36, padding: "0 0 24px",
-              border: "2px solid rgba(245,195,155,0.7)",
-              boxShadow: "0 32px 80px rgba(180,90,50,0.24), 0 8px 24px rgba(200,120,80,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+              border: "2px solid rgba(143,198,174,0.55)",
+              boxShadow: "0 32px 80px rgba(63,122,99,0.22), 0 8px 24px rgba(63,122,99,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
               position: "relative", overflow: "hidden",
             }}>
               <div style={{
@@ -491,36 +525,38 @@ export default function Home() {
                 borderRadius: "34px 34px 0 0", padding: "22px 24px 18px",
                 position: "relative", overflow: "hidden", marginBottom: 20,
               }}>
-                <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.18)", pointerEvents: "none" }} />
-                <div style={{ position: "absolute", bottom: -20, left: -20, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.12)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.22)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", bottom: -20, left: -20, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.16)", pointerEvents: "none" }} />
+                <span className="note-float" style={{ top: 14, left: 22, color: "#fff" }} aria-hidden="true">🎵</span>
+                <span className="note-float" style={{ top: 30, right: 30, color: "#fff", animationDelay: "1.4s" }} aria-hidden="true">🎶</span>
                 <button
                   onClick={() => setShowPeriodPage(false)} aria-label="ปิดหน้าต่างนี้"
-                  style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: "50%", background: "rgba(180,100,60,0.15)", border: "none", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#A06845", zIndex: 2 }}
+                  style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: "50%", background: "rgba(63,122,99,0.16)", border: "none", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#3F7A63", zIndex: 2 }}
                 >✕</button>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                  <BearImage src="/bear3.png" width={130} height={130} alt="หมีเนย — กำลังส่งกำลังใจ"
-                    style={{ borderRadius: 24, border: "3px solid rgba(255,255,255,0.85)", boxShadow: "0 8px 24px rgba(180,100,50,0.22)", display: "block", objectFit: "cover" }}
+                  <BearImage src="/bear4.png" width={130} height={130} alt="หมีเนย — กำลังส่งกำลังใจพร้อมเพลงโปรด"
+                    style={{ borderRadius: 24, border: "3px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 24px rgba(63,122,99,0.25)", display: "block", objectFit: "cover" }}
                   />
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 19, color: "#6B3E20", fontWeight: 600, lineHeight: 1.4 }}>หมีเนยอยู่ตรงนี้เสมอนะ 🧸</div>
-                  <div style={{ fontSize: 12, color: "#A06040", marginTop: 4, opacity: 0.85 }}>ไม่ว่าจะเป็นยังไง หมีเนยเข้าใจ 💛</div>
+                  <div style={{ fontSize: 19, color: "#3F5E4A", fontWeight: 600, lineHeight: 1.4 }}>หมีเนยอยู่ตรงนี้เสมอนะ 🧸</div>
+                  <div style={{ fontSize: 12, color: "#5C8C72", marginTop: 4, opacity: 0.9 }}>ไม่ว่าจะเป็นยังไง หมีเนยเข้าใจ 💛</div>
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 18px", marginBottom: 20 }}>
-                {[
-                  { delay: "0.05s", icon: "🧸", text: "เที่ยวให้สนุกนะะ หมีเนยส่งกำลังใจตามไปด้วยทุกก้าวเลย 💛" },
-                  { delay: "0.15s", icon: "📸", text: "ถ่ายรูปสวยๆ มาอวดหมีเนยด้วยน้า หมีเนยรอดูอยู่เลย 🌷" },
-                  { delay: "0.25s", icon: "✨", text: "เดินทางปลอดภัยนะะ อย่าลืมพักเหนื่อยระหว่างทาง แล้วแวะกินของอร่อยด้วยน้า 🍜" },
-                  { delay: "0.35s", icon: "🌸", text: "เก็บความทรงจำดีๆ กลับมาด้วยนะ มีหมีเนยคอยเอาใจช่วยทุกกิโลเมตรเลย 🧸💖" },
-                ].map((item, i) => (
+               {[
+  { delay: "0.05s", icon: "🧸", text: "วันนี้ทำงานเหนื่อยแค่ไหน หมีเนยก็ส่งกำลังใจไปด้วยทุกนาทีเลยนะ 💛" },
+  { delay: "0.15s", icon: "📸", text: "ถ้าเครียดมากๆ ลองพักสายตา ถ่ายรูปอะไรน่ารักๆ ผ่อนใจบ้างนะ หมีเนยรอดูอยู่เลย 🌷" },
+  { delay: "0.25s", icon: "🎵", text: "ทำงานไปด้วย เปิดเพลงเพราะๆ คลอไปด้วยนะ แล้วอย่าลืมแวะกินของอร่อยด้วยน้า 🍜" },
+  { delay: "0.35s", icon: "🎶", text: "มีหมีเนยคอยเอาใจช่วยทุกเรื่องเลยน้า 🧸💖" },
+].map((item, i) => (
                   <div key={i} className="msg-line" style={{
                     animationDelay: item.delay,
-                    background: i % 2 === 0 ? "linear-gradient(135deg,rgba(255,245,232,0.95),rgba(255,235,215,0.9))" : "linear-gradient(135deg,rgba(255,238,220,0.9),rgba(255,228,205,0.85))",
-                    borderRadius: 18, padding: "12px 15px", fontSize: 13.5, color: "#7A4A28", lineHeight: 1.75,
-                    border: "1px solid rgba(245,200,160,0.45)", whiteSpace: "pre-line",
+                    background: i % 2 === 0 ? "linear-gradient(135deg,rgba(255,253,246,0.95),rgba(243,236,217,0.9))" : "linear-gradient(135deg,rgba(238,247,242,0.9),rgba(223,240,231,0.85))",
+                    borderRadius: 18, padding: "12px 15px", fontSize: 13.5, color: "#5E4A30", lineHeight: 1.75,
+                    border: "1px solid rgba(143,198,174,0.35)", whiteSpace: "pre-line",
                     display: "flex", gap: 10, alignItems: "flex-start",
-                    boxShadow: "0 2px 10px rgba(200,130,80,0.07)",
+                    boxShadow: "0 2px 10px rgba(63,122,99,0.06)",
                   }}>
                     <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }} aria-hidden="true">{item.icon}</span>
                     <span>{item.text}</span>
@@ -528,20 +564,20 @@ export default function Home() {
                 ))}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 24px", marginBottom: 18 }}>
-                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(210,160,110,0.35),transparent)" }} />
-                <span aria-hidden="true" style={{ fontSize: 14, opacity: 0.6 }}>🌷</span>
-                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(210,160,110,0.35),transparent)" }} />
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(95,160,130,0.35),transparent)" }} />
+                <span aria-hidden="true" style={{ fontSize: 14, opacity: 0.6 }}>🎵</span>
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(95,160,130,0.35),transparent)" }} />
               </div>
               <div style={{ padding: "0 18px" }}>
                 <button
                   onClick={() => setShowPeriodPage(false)}
                   className="period-close-btn" aria-label="ปิดหน้าต่าง — ขอบคุณหมีเนย"
-                  style={{ width: "100%", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 15, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: "pointer", letterSpacing: "0.3px", boxShadow: "0 8px 24px rgba(192,100,60,0.32), 0 2px 8px rgba(192,100,60,0.18)" }}
+                  style={{ width: "100%", color: "#fff", border: "none", borderRadius: 999, padding: "14px 24px", fontSize: 15, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: "pointer", letterSpacing: "0.3px", boxShadow: "0 8px 24px rgba(63,122,99,0.32), 0 2px 8px rgba(63,122,99,0.18)" }}
                   onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
                   onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
                   onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                >ขอบคุณหมีเนยนะ 🌸</button>
+                >ขอบคุณหมีเนยนะ 🌿</button>
               </div>
             </div>
           </div>
@@ -551,26 +587,26 @@ export default function Home() {
       {/* ── Special popup ── */}
       {showSpecialPopup && (
         <>
-          <div className="welcome-overlay" style={{ zIndex: 109, background: "rgba(255,225,200,0.75)" }} />
+          <div className="welcome-overlay" style={{ zIndex: 109, background: "rgba(220,238,228,0.75)" }} />
           <div className="special-popup" role="dialog" aria-modal="true" aria-label="ข้อความจากหมีเนย">
-            <div style={{ background: "linear-gradient(145deg,#FFF8F0,#FFE8D0)", borderRadius: 32, padding: "28px 24px 24px", textAlign: "center", border: "2.5px solid #F5C9A0", boxShadow: "0 24px 70px rgba(180,100,50,0.28)", width: "min(300px, calc(100vw - 48px))", position: "relative", overflow: "hidden" }}>
+            <div style={{ background: "linear-gradient(145deg,#FFFDF6,#F0EAD2)", borderRadius: 32, padding: "28px 24px 24px", textAlign: "center", border: "2.5px solid #CDE6D6", boxShadow: "0 24px 70px rgba(63,122,99,0.26)", width: "min(300px, calc(100vw - 48px))", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: -18, right: -18, fontSize: 60, opacity: 0.08, transform: "rotate(20deg)", pointerEvents: "none", userSelect: "none" }} aria-hidden="true">🧸</div>
-              <div style={{ position: "absolute", bottom: -14, left: -14, fontSize: 50, opacity: 0.08, transform: "rotate(-15deg)", pointerEvents: "none", userSelect: "none" }} aria-hidden="true">💛</div>
+              <div style={{ position: "absolute", bottom: -14, left: -14, fontSize: 50, opacity: 0.08, transform: "rotate(-15deg)", pointerEvents: "none", userSelect: "none" }} aria-hidden="true">🎵</div>
               <div className="heart-float" style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
                 <button onClick={handleBearTap} onTouchStart={handleBearTap} aria-label="แตะหมีเนย" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}>
-                  <BearImage src="/bear2.png" width={76} height={76} alt="หมีเนยกำลังส่งกำลังใจ" style={{ borderRadius: "50%", border: "3px solid #FFD9B8", boxShadow: "0 8px 24px rgba(180,100,50,0.18)", display: "block" }} />
+                  <BearImage src="/bear2.png" width={76} height={76} alt="หมีเนยกำลังส่งกำลังใจ" style={{ borderRadius: "50%", border: "3px solid #DCF0E4", boxShadow: "0 8px 24px rgba(63,122,99,0.2)", display: "block" }} />
                 </button>
               </div>
-              <div style={{ fontSize: 17, color: "#7A4F2E", fontWeight: 600, marginBottom: 10, lineHeight: 1.5 }}>วันนี้มีประชุมตอนเช้าใช่มั้ยแงง 🥺</div>
-              <div style={{ fontSize: 13, color: "#A06845", lineHeight: 1.85, marginBottom: 18 }}>
+              <div style={{ fontSize: 17, color: "#3F5E4A", fontWeight: 600, marginBottom: 10, lineHeight: 1.5 }}>วันนี้มีประชุมตอนเช้าใช่มั้ยแงง 🥺</div>
+              <div style={{ fontSize: 13, color: "#6E4A2E", lineHeight: 1.85, marginBottom: 18 }}>
                 ไม่เป็นไรนะ~ หมีเนยอยู่ตรงนี้แล้ว 🧸<br />
                 หายใจลึกๆ แล้วก็ไปได้เลย<br />
-                <span style={{ fontSize: 12, color: "#B8724A" }}>วันนี้ก็เก่งมากแล้วนะ ที่ลุกขึ้นมา 🌸</span>
+                <span style={{ fontSize: 12, color: "#5C8C72" }}>วันนี้ก็เก่งมากแล้วนะ ที่ลุกขึ้นมา 🌿</span>
               </div>
               <button
                 onClick={() => { setShowSpecialPopup(false); setShowWelcome(true); setTimeout(() => setShowWelcome(false), 3000); }}
                 className="special-btn" aria-label="พร้อมแล้ว ปิดหน้าต่างนี้"
-                style={{ color: "#fff", border: "none", borderRadius: 999, padding: "13px 32px", fontSize: 15, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: "pointer", boxShadow: "0 6px 20px rgba(192,122,80,0.4)", letterSpacing: "0.3px", width: "100%" }}
+                style={{ color: "#fff", border: "none", borderRadius: 999, padding: "13px 32px", fontSize: 15, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: "pointer", boxShadow: "0 6px 20px rgba(63,122,99,0.38)", letterSpacing: "0.3px", width: "100%" }}
                 onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
                 onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
                 onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
@@ -586,10 +622,10 @@ export default function Home() {
         <>
           <div className="welcome-overlay" />
           <div className="welcome-popup" role="status" aria-live="polite">
-            <div style={{ background: "linear-gradient(135deg,#FFF5EC,#FFE8D5)", borderRadius: 32, padding: "32px 40px", textAlign: "center", border: "2px solid #F5D0B5", boxShadow: "0 20px 60px rgba(180,120,80,0.25)", minWidth: 260 }}>
+            <div style={{ background: "linear-gradient(135deg,#FFFDF6,#F2EAD3)", borderRadius: 32, padding: "32px 40px", textAlign: "center", border: "2px solid #E7D6AC", boxShadow: "0 20px 60px rgba(63,122,99,0.2)", minWidth: 260 }}>
               <div style={{ fontSize: 52, marginBottom: 8 }} aria-hidden="true">🧸</div>
-              <div style={{ fontSize: 22, color: "#8B5E3C", fontWeight: 600, marginBottom: 6 }}>สวัสดีจ้า~</div>
-              <div style={{ fontSize: 15, color: "#B07D62", lineHeight: 1.6 }}>หมีเนยรอส่งกำลังใจอยู่นะ 💛</div>
+              <div style={{ fontSize: 22, color: "#6E4A2E", fontWeight: 600, marginBottom: 6 }}>สวัสดีจ้า~</div>
+              <div style={{ fontSize: 15, color: "#5C8C72", lineHeight: 1.6 }}>หมีเนยรอส่งกำลังใจอยู่นะ 💛</div>
               <div style={{ marginTop: 16, display: "flex", justifyContent: "center", gap: 6 }}>
                 {[0, 1, 2].map((i) => <div key={i} className="typing-dot" style={{ animationDelay: `${i * 0.2}s` }} />)}
               </div>
@@ -629,12 +665,12 @@ export default function Home() {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ position: "relative", flexShrink: 0 }}>
                 <BearImage src="/bear.png" width={48} height={48} alt="หมีเนย — ออนไลน์อยู่"
-                  style={{ borderRadius: "50%", border: "3px solid #fff", boxShadow: "0 4px 12px rgba(180,120,80,0.2)" }}
+                  style={{ borderRadius: "50%", border: "3px solid #fff", boxShadow: "0 4px 12px rgba(63,122,99,0.18)" }}
                 />
                 <div style={{ position: "absolute", bottom: 2, right: 2, width: 11, height: 11, borderRadius: "50%", background: "var(--clr-accent)", border: "2px solid #fff" }} aria-hidden="true" />
               </div>
               <div style={{ flex: 1 }}>
-                <h1 style={{ fontSize: 19, color: "var(--clr-text-h)", fontWeight: 600, lineHeight: 1.2 }}>Butterbear 🧸</h1>
+                <h1 className="header-title" style={{ fontSize: 19, color: "var(--clr-text-h)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "0.2px" }}>Butterbear 🧸</h1>
                 <p style={{ fontSize: 12, color: "var(--clr-text-s)", marginTop: 1 }}>
                   {isTyping
                     ? <span style={{ display: "flex", alignItems: "center", gap: 4 }} aria-live="polite" aria-label="หมีเนยกำลังพิมพ์"><span>กำลังพิมพ์</span>{[0,1,2].map((i) => <span key={i} className="typing-dot" style={{ width: 5, height: 5, animationDelay: `${i*0.2}s` }} />)}</span>
@@ -642,12 +678,13 @@ export default function Home() {
                 </p>
               </div>
               {msgCounter > 0 && (
-                <div aria-label={`${msgCounter} ข้อความจากหมีเนย`} style={{ background: "var(--clr-text-m)", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 600, padding: "2px 9px" }}>
+                <div aria-label={`${msgCounter} ข้อความจากหมีเนย`} style={{ background: "var(--clr-btn2)", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 600, padding: "2px 9px" }}>
                   {msgCounter}
                 </div>
               )}
             </div>
           </header>
+          <div className="checker-ribbon" aria-hidden="true" />
 
           {/* ── CHAT AREA ── */}
           <section
@@ -655,7 +692,7 @@ export default function Home() {
             style={{ flex: 1, overflowY: "auto", padding: "14px 16px 10px", paddingRight: "clamp(16px, 28vw, 120px)", position: "relative", zIndex: 5, display: "flex", flexDirection: "column", gap: 12 }}
           >
             <div style={{ textAlign: "center", marginBottom: 2 }}>
-              <span style={{ background: "rgba(200,155,118,0.15)", color: "var(--clr-text-s)", fontSize: 11, padding: "4px 14px", borderRadius: 999, fontWeight: 500 }}>
+              <span style={{ background: "rgba(63,122,99,0.12)", color: "var(--clr-btn2)", fontSize: 11, padding: "4px 14px", borderRadius: 999, fontWeight: 500 }}>
                 {thaiDate}
               </span>
             </div>
@@ -666,7 +703,7 @@ export default function Home() {
             {isTyping && (
               <div className="bubble-anim" style={{ display: "flex", gap: 10, alignItems: "flex-end" }} aria-hidden="true">
                 <BearImage src="/bear2.png" width={36} height={36} alt="" style={{ borderRadius: "50%", flexShrink: 0 }} />
-                <div style={{ background: "#FFF0DD", borderRadius: "20px 20px 20px 4px", padding: "12px 18px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 8px rgba(180,120,80,0.12)" }}>
+                <div style={{ background: "var(--clr-bubble)", borderRadius: "20px 20px 20px 4px", padding: "12px 18px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 8px rgba(63,122,99,0.1)" }}>
                   <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
                 </div>
               </div>
@@ -682,7 +719,7 @@ export default function Home() {
               style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "block" }}
             >
               <div className={`${bearShake ? "bear-shake" : bearBounce ? "bear-bounce" : "bear-bob"}`} style={{ transformOrigin: "center bottom" }}>
-                <BearImage src="/bear.png" width={100} height={100} alt="หมีเนย" style={{ filter: "drop-shadow(0 8px 20px rgba(180,120,80,0.3))" }} />
+                <BearImage src="/bear.png" width={100} height={100} alt="หมีเนย" style={{ filter: "drop-shadow(0 8px 20px rgba(63,122,99,0.28))" }} />
               </div>
               <div style={{ textAlign: "center", fontSize: 9, color: "var(--clr-text-m)", marginTop: -4, opacity: 0.7, letterSpacing: "0.5px" }} aria-hidden="true">แตะได้นะ 🐾</div>
             </button>
@@ -695,25 +732,25 @@ export default function Home() {
               onMouseEnter={() => setMysteriousTooltip(true)} onMouseLeave={() => setMysteriousTooltip(false)}
               onFocus={() => setMysteriousTooltip(true)} onBlur={() => setMysteriousTooltip(false)}
               className="mysterious-btn" aria-label="ข้อความพิเศษจากหมีเนย — เปิดดู" aria-haspopup="dialog"
-              style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#FFE9A0,#FFD060,#FFC040)", border: "2px solid rgba(255,230,130,0.85)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.15s" }}
+              style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#E3F4EB,#BFE6D2,#9BD7BA)", border: "2px solid rgba(180,235,210,0.9)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.15s" }}
               onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
               onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              <span className="star-icon" aria-hidden="true">✨</span>
+              <span className="star-icon" aria-hidden="true">🎵</span>
               {mysteriousTooltip && <div className="mysterious-tooltip" role="tooltip">ข้อความพิเศษ 🧸</div>}
             </button>
             <div style={{ textAlign: "center", fontSize: 9, color: "var(--clr-text-m)", marginTop: 3, opacity: 0.75, letterSpacing: "0.3px", pointerEvents: "none", whiteSpace: "nowrap" }} aria-hidden="true">พิเศษ ✨</div>
           </div>
 
           {/* ── BOTTOM ZONE ── */}
-          <footer className="safe-bottom" style={{ background: "linear-gradient(180deg,transparent 0%,#FFF8F2 22%)", paddingTop: 8, paddingLeft: 16, paddingRight: 16, position: "relative", zIndex: 10, flexShrink: 0 }}>
+          <footer className="safe-bottom" style={{ background: "linear-gradient(180deg,transparent 0%,#FFFBF0 22%)", paddingTop: 8, paddingLeft: 16, paddingRight: 16, position: "relative", zIndex: 10, flexShrink: 0 }}>
             <button
               onClick={() => { if (!isTyping) { setIsPressed(true); setTimeout(() => setIsPressed(false), 500); sendMessage(); } }}
-              className={isPressed ? "btn-pulse" : ""}
+              className={`cta-btn ${isPressed ? "btn-pulse" : ""}`}
               disabled={isTyping} aria-label={isTyping ? "รอหมีเนยพิมพ์ข้อความ" : "รับกำลังใจจากหมีเนย"} aria-busy={isTyping}
-              style={{ width: "100%", background: isTyping ? "linear-gradient(135deg,#D4B498,#C4967A)" : "linear-gradient(135deg,#D4A07A,#C07A50)", color: "#fff", border: "none", borderRadius: 18, padding: "14px 24px", fontSize: 16, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: isTyping ? "not-allowed" : "pointer", transition: "transform 0.15s, opacity 0.15s", opacity: isTyping ? 0.85 : 1, boxShadow: isTyping ? "none" : "0 6px 20px rgba(192,122,80,0.35), 0 2px 8px rgba(192,122,80,0.2)", letterSpacing: "0.3px", marginBottom: 10 }}
+              style={{ width: "100%", background: isTyping ? "linear-gradient(135deg,#AECFBE,#8FBBA6)" : "linear-gradient(135deg,var(--clr-btn),var(--clr-btn2))", color: "#fff", border: "none", borderRadius: 18, padding: "14px 24px", fontSize: 16, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: isTyping ? "not-allowed" : "pointer", transition: "transform 0.15s, opacity 0.15s", opacity: isTyping ? 0.85 : 1, boxShadow: isTyping ? "none" : "0 6px 20px rgba(63,122,99,0.35), 0 2px 8px rgba(63,122,99,0.2)", letterSpacing: "0.3px", marginBottom: 10 }}
               onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
@@ -724,14 +761,14 @@ export default function Home() {
 
             {/* ── MUSIC PLAYER ── */}
             <div role="region" aria-label="เครื่องเล่นเพลง"
-              style={{ background: "linear-gradient(135deg,rgba(255,240,220,0.97),rgba(255,225,195,0.97))", borderRadius: 20, border: "1.5px solid rgba(244,200,160,0.6)", padding: "10px 14px 10px", boxShadow: "0 4px 16px rgba(180,120,80,0.12)" }}
+              style={{ background: "linear-gradient(135deg,rgba(255,253,246,0.97),rgba(238,247,242,0.97))", borderRadius: 20, border: "1.5px solid rgba(143,198,174,0.45)", padding: "10px 14px 10px", boxShadow: "0 4px 16px rgba(63,122,99,0.1)" }}
             >
               {/* Row 1: disc + title + bars + controls */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 {/* Vinyl */}
-                <div aria-hidden="true" style={{ width: 38, height: 38, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(139,94,60,0.3)", position: "relative", overflow: "hidden", background: "#8B5E3C" }}>
-                  <div className={isPlaying ? "vinyl-spin" : ""} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "conic-gradient(from 0deg,#7A4F2E 0%,#C89B76 25%,#8B5E3C 50%,#D4A07A 75%,#7A4F2E 100%)", opacity: 0.85 }} />
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFF5EC", border: "2px solid #D4A07A", position: "relative", zIndex: 2 }} />
+                <div aria-hidden="true" style={{ width: 38, height: 38, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(63,122,99,0.28)", position: "relative", overflow: "hidden", background: "#3F7A63" }}>
+                  <div className={isPlaying ? "vinyl-spin" : ""} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "conic-gradient(from 0deg,#3F7A63 0%,#9BD7BA 25%,#5C9C82 50%,#CDA978 75%,#3F7A63 100%)", opacity: 0.9 }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFFDF6", border: "2px solid var(--clr-btn)", position: "relative", zIndex: 2 }} />
                 </div>
 
                 {/* Track name + artist */}
@@ -747,13 +784,13 @@ export default function Home() {
                 {/* Music bars */}
                 <div aria-hidden="true" style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 16, opacity: isPlaying ? 1 : 0.25, transition: "opacity 0.3s", marginRight: 2 }}>
                   {[{ cls: "music-bar-a", h: 4 }, { cls: "music-bar-b", h: 10 }, { cls: "music-bar-c", h: 7 }].map(({ cls, h }, i) => (
-                    <div key={i} className={isPlaying ? cls : ""} style={{ width: 3, height: isPlaying ? undefined : h, background: "var(--clr-text-m)", borderRadius: 2 }} />
+                    <div key={i} className={isPlaying ? cls : ""} style={{ width: 3, height: isPlaying ? undefined : h, background: "var(--clr-btn2)", borderRadius: 2 }} />
                   ))}
                 </div>
 
                 {/* Volume */}
                 <button onClick={() => setShowVolumeSlider((v) => !v)} aria-label={`ปรับระดับเสียง — ${Math.round(volume * 100)}%`} aria-expanded={showVolumeSlider}
-                  style={{ background: showVolumeSlider ? "rgba(200,155,118,0.2)" : "transparent", border: "none", cursor: "pointer", fontSize: 15, padding: "3px 5px", borderRadius: 8 }}>
+                  style={{ background: showVolumeSlider ? "rgba(63,122,99,0.14)" : "transparent", border: "none", cursor: "pointer", fontSize: 15, padding: "3px 5px", borderRadius: 8 }}>
                   {volume === 0 ? "🔇" : volume < 0.4 ? "🔉" : "🔊"}
                 </button>
 
@@ -761,7 +798,7 @@ export default function Home() {
                 <button className="nav-btn" onClick={() => changeTrack(-1)} aria-label="เพลงก่อนหน้า">⏮</button>
                 <button
                   onClick={togglePlay} aria-label={isPlaying ? "หยุดเพลง" : "เล่นเพลง"} aria-pressed={isPlaying}
-                  style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#D4A07A,#C07A50)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, boxShadow: "0 3px 10px rgba(192,122,80,0.4)", transition: "transform 0.15s", flexShrink: 0 }}
+                  style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,var(--clr-btn),var(--clr-btn2))", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, boxShadow: "0 3px 10px rgba(63,122,99,0.4)", transition: "transform 0.15s", flexShrink: 0 }}
                   onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
                   onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
@@ -821,7 +858,7 @@ function BubbleMessage({ img, text, isFirst }: { img: string; text: string; isFi
       <BearImage src={img} width={36} height={36} alt="" style={{ borderRadius: "50%", flexShrink: 0 }} />
       <div
         role="article" aria-label={`ข้อความจากหมีเนย: ${text}`}
-        style={{ background: isFirst ? "var(--clr-bubble1)" : "var(--clr-bubble)", color: "var(--clr-text-h)", padding: "12px 18px", borderRadius: "20px 20px 20px 4px", maxWidth: "76%", fontSize: 15, lineHeight: 1.6, boxShadow: "0 2px 10px rgba(180,120,80,0.12)", border: "1px solid rgba(244,200,160,0.5)", fontWeight: 500 }}
+        style={{ background: isFirst ? "var(--clr-bubble1)" : "var(--clr-bubble)", color: "var(--clr-text-h)", padding: "12px 18px", borderRadius: "20px 20px 20px 4px", maxWidth: "76%", fontSize: 15, lineHeight: 1.6, boxShadow: "0 2px 10px rgba(63,122,99,0.1)", border: "1px solid rgba(143,198,174,0.4)", fontWeight: 500 }}
       >{text}</div>
     </div>
   );
