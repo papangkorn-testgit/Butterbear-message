@@ -26,9 +26,7 @@ const MESSAGES = [
   "เดินทางไปทำงานปลอดภัยนะ 💛",
   "วันนี้ท้องฟ้าสวยเหมือนคนอ่านเลย ☁️",
   "หมีเนยรอเป็นกำลังใจช่วงพักเบรกนะ 🌷",
-  "แวะกินของอร่อยด้วยนะ 🍜",
   "อย่าลืมพักสายตา พักมือบ้างนะ 🌿",
-  "วันนี้ผ่านไปได้ก็เก่งมากแล้วนะ ✨",
   "ส่งกำลังใจให้คนเก่ง 💖",
   "หมีเนยรักนะ 🍯",
   "ทำงานเหนื่อยๆ ก็พักบ้างนะ 🐻",
@@ -43,6 +41,39 @@ const MESSAGES = [
 ];
 
 const BEAR_REACTIONS = ["🧸", "💛", "🎵", "✨", "🍯", "💕", "🎶", "⭐"];
+
+// ─── 🔐 EASTER EGG — ข้อความลับจากหมีเนย ───
+// ✏️  แก้ตรงนี้เลยนะ! ใส่ข้อความที่อยากบอกเขา
+const SECRET_MESSAGE_LINES = [
+  { icon: "🧸", text: "รู้มั้ยว่าหมีเนยซ่อนข้อความนี้ไว้นานมากแล้ว... รอให้เธอกดเจอเองนะ 🍯" },
+  { icon: "💛", text: "ขอบคุณที่แตะหมีเนยซ้ำๆ แปลว่าเธอน่ารักมากเลย แงงเป็นกำลังใจให้น้าา ✨" },
+  { icon: "💖", text: "เธอเก่งมากแล้ว แค่แตะหมีเนยจนครบก็รู้ว่าเธอต้องอดทนเก่งในชีวิตแน่ๆเลยสู้ๆน้า🧸" },
+];
+// ─────────────────────────────────────────────
+
+// ─── Time-based status messages ───
+function getTimeBasedStatus(): string {
+  const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+  const h = thai.getHours();
+  const m = thai.getMinutes();
+  const totalMin = h * 60 + m;
+
+  if (totalMin >= 20 * 60 + 30) {
+    return "กลับบ้านได้แล้วนะ วันนี้เก่งมากเลย 🧸✨";
+  } else if (totalMin >= 20 * 60) {
+    return "โค้งสุดท้ายแล้ว ใกล้มากแล้ว หมีเนยภูมิใจในตัวนะ 🤍";
+  } else if (h >= 18) {
+    return "ท้องฟ้าข้างนอกเริ่มมืดแล้ว เหลืออีกนิดเดียวเองนะ 🌙";
+  } else if (h >= 16) {
+    return "ช่วงนี้อาจเหนื่อยที่สุดเลย แต่ผ่านมาได้ทุกครั้งนะ หมีเนยเชื่อ 🌿";
+  } else if (h >= 14) {
+    return "บ่ายแล้วนะ สู้ๆ หมีเนยแอบเป็นกำลังใจอยู่ทุกนาทีเลย 🧸";
+  } else if (h >= 12) {
+    return "พักกินข้าวด้วยนะ อย่าลืมดูแลท้องตัวเองด้วย 🍜";
+  } else {
+    return "สำหรับวันที่เหนื่อย 💛";
+  }
+}
 
 interface Sparkle    { id: number; x: number; y: number; size: number; duration: number; delay: number; emoji: string; }
 interface ChatMessage { id: number; text: string; }
@@ -95,6 +126,13 @@ export default function Home() {
   const [isPressed, setIsPressed]               = useState(false);
   const [msgCounter, setMsgCounter]             = useState(0);
 
+  // ── Easter egg state ──
+  const [bearTapCount, setBearTapCount]         = useState(0);
+  const [showEasterEgg, setShowEasterEgg]       = useState(false);
+  const [easterEggUnlocked, setEasterEggUnlocked] = useState(false);
+  const [showTapHint, setShowTapHint]           = useState(false);
+  const tapResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // ── Music player state ──
   const [trackIndex, setTrackIndex]             = useState(0);
   const [isPlaying, setIsPlaying]               = useState(false);
@@ -105,6 +143,7 @@ export default function Home() {
 
   const [thaiTime, setThaiTime] = useState("");
   const [thaiDate, setThaiDate] = useState("");
+  const [timeStatus, setTimeStatus] = useState(() => getTimeBasedStatus());
   const [bearPops, setBearPops] = useState<BearPop[]>([]);
   const [bearBounce, setBearBounce]             = useState(false);
   const [bearShake, setBearShake]               = useState(false);
@@ -118,7 +157,7 @@ export default function Home() {
 
   const SPARKLE_EMOJIS = ["✨", "🎵", "💕", "⭐", "🍯", "🎶", "💛"];
 
-  // ─── Clock ───
+  // ─── Clock + time status ───
   useEffect(() => {
     const tick = () => {
       const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -128,6 +167,7 @@ export default function Home() {
       setThaiDate(
         thai.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
       );
+      setTimeStatus(getTimeBasedStatus());
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -164,6 +204,15 @@ export default function Home() {
       return () => clearTimeout(t);
     }
   }, []);
+
+  // ─── Show hint after 3 taps ───
+  useEffect(() => {
+    if (bearTapCount >= 3 && bearTapCount < 10 && !easterEggUnlocked) {
+      setShowTapHint(true);
+      const t = setTimeout(() => setShowTapHint(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [bearTapCount, easterEggUnlocked]);
 
   // ─── BGM — init once ───
   useEffect(() => {
@@ -273,7 +322,24 @@ export default function Home() {
     } catch {}
   }, []);
 
-  // ─── Bear tap ───
+  // ─── Easter egg unlock sound ───
+  const playUnlockSound = useCallback(() => {
+    try {
+      const ctx = getAudioCtx(); const now = ctx.currentTime;
+      const notes = [[523, 0], [659, 0.12], [784, 0.24], [1047, 0.38]];
+      notes.forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + delay);
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.55);
+        osc.start(now + delay); osc.stop(now + delay + 0.6);
+      });
+    } catch {}
+  }, []);
+
+  // ─── Bear tap — with easter egg counter ───
   const handleBearTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setBearBounce(true); setTimeout(() => setBearBounce(false), 600);
@@ -296,7 +362,30 @@ export default function Home() {
     setTimeout(() => {
       setBearPops((prev) => prev.filter((p) => !newPops.find((n) => n.id === p.id)));
     }, 1000);
-  }, []);
+
+    // ── Easter egg tap counter ──
+    if (!easterEggUnlocked) {
+      setBearTapCount((prev) => {
+        const next = prev + 1;
+        if (next >= 10) {
+          // 🎉 UNLOCK!
+          setTimeout(() => {
+            setEasterEggUnlocked(true);
+            setShowEasterEgg(true);
+            playUnlockSound();
+          }, 300);
+          return 10;
+        }
+        return next;
+      });
+      // Reset counter if idle for 8 seconds
+      if (tapResetTimer.current) clearTimeout(tapResetTimer.current);
+      tapResetTimer.current = setTimeout(() => {
+        setBearTapCount(0);
+        setShowTapHint(false);
+      }, 8000);
+    }
+  }, [easterEggUnlocked, playBearSound, playUnlockSound]);
 
   // ─── Random message ───
   const getRandomMessage = useCallback(() => {
@@ -318,6 +407,9 @@ export default function Home() {
     }, 1200 + Math.random() * 600);
   }, [isTyping, getRandomMessage, playMessageSound]);
 
+  // ── Progress dots for easter egg ──
+  const tapProgress = Math.min(bearTapCount, 10);
+
   return (
     <>
       <style>{`
@@ -330,7 +422,6 @@ export default function Home() {
           -webkit-tap-highlight-color: transparent;
         }
         :root {
-          /* ── Buttercream + checkerboard-garden palette ── */
           --clr-bg:       #FFF7E3;
           --clr-card:     #FFFDF5;
           --clr-header:   #FFEFC4;
@@ -444,16 +535,10 @@ export default function Home() {
         .msg-line { animation: msgFadeSlide 0.55s cubic-bezier(0.34,1.3,0.64,1) forwards; opacity: 0; }
         @keyframes periodBtnShimmer { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
         .period-close-btn { background: linear-gradient(90deg,var(--clr-btn2),#56A483,#3F7A63,#5CB592,var(--clr-btn2)); background-size: 300% auto; animation: periodBtnShimmer 3s linear infinite; }
-
-        /* ── Track switch animation ── */
         @keyframes trackSlideIn { 0% { opacity: 0; transform: translateX(10px); } 100% { opacity: 1; transform: translateX(0); } }
         .track-name-anim { animation: trackSlideIn 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards; }
-
-        /* ── Track dot indicators ── */
         .track-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(63,122,99,0.25); transition: all 0.3s ease; }
         .track-dot.active { background: var(--clr-btn2); width: 14px; border-radius: 999px; }
-
-        /* ── Nav button ── */
         .nav-btn {
           background: rgba(63,122,99,0.12); border: none; cursor: pointer;
           width: 28px; height: 28px; border-radius: 50%;
@@ -464,8 +549,6 @@ export default function Home() {
         }
         .nav-btn:hover { background: rgba(63,122,99,0.22); }
         .nav-btn:active { transform: scale(0.88); }
-
-        /* ── Checkerboard ribbon (nod to Butterbear's storybook floor) ── */
         .checker-ribbon {
           height: 7px; width: 100%; flex-shrink: 0;
           background-image:
@@ -476,8 +559,6 @@ export default function Home() {
           background-color: var(--clr-check-a);
           opacity: 0.55;
         }
-
-        /* ── Music note float (signature motif) ── */
         @keyframes noteFloat {
           0%   { transform: translateY(0) rotate(-6deg); opacity: 0.0; }
           12%  { opacity: 0.85; }
@@ -486,24 +567,206 @@ export default function Home() {
           100% { transform: translateY(-52px) rotate(-4deg); opacity: 0; }
         }
         .note-float { position: absolute; pointer-events: none; animation: noteFloat 4.5s ease-in-out infinite; font-size: 16px; }
+        @keyframes statusFadeIn { 0% { opacity: 0; transform: translateY(3px); } 100% { opacity: 1; transform: translateY(0); } }
+        .time-status { animation: statusFadeIn 0.5s ease forwards; }
 
-        /* iPhone 14 (390 x 844) tuned spacing */
+        /* ── TAP HINT ── */
+        @keyframes tapHintIn {
+          0%   { opacity: 0; transform: translateY(6px) scale(0.92); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes tapHintOut {
+          0%   { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-4px); }
+        }
+        .tap-hint {
+          animation: tapHintIn 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards;
+        }
+
+        /* ── TAP PROGRESS DOTS ── */
+        .tap-progress-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: rgba(63,122,99,0.18);
+          transition: all 0.25s cubic-bezier(0.34,1.5,0.64,1);
+          flex-shrink: 0;
+        }
+        .tap-progress-dot.filled {
+          background: var(--clr-btn2);
+          transform: scale(1.25);
+          box-shadow: 0 0 4px rgba(63,122,99,0.4);
+        }
+
+        /* ── EASTER EGG POPUP ── */
+        @keyframes eggPopIn {
+          0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.5) rotate(-8deg); }
+          60%  { transform: translate(-50%,-50%) scale(1.08) rotate(2deg); }
+          80%  { transform: translate(-50%,-50%) scale(0.96) rotate(-1deg); }
+          100% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+        }
+        .easter-egg-popup {
+          position: fixed; top: 50%; left: 50%;
+          transform: translate(-50%,-50%);
+          z-index: 300;
+          animation: eggPopIn 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        @keyframes confettiFall {
+          0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+        }
+        .confetti-piece {
+          position: absolute;
+          pointer-events: none;
+          animation: confettiFall 1.2s ease-out forwards;
+        }
+        .egg-close-btn {
+          background: linear-gradient(90deg,var(--clr-btn2),#56A483,#3F7A63,#5CB592,var(--clr-btn2));
+          background-size: 300% auto;
+          animation: periodBtnShimmer 3s linear infinite;
+        }
+        @keyframes starBurst {
+          0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+          50%  { opacity: 1; }
+          100% { transform: scale(1.8) rotate(180deg); opacity: 0; }
+        }
+        .star-burst {
+          position: absolute; pointer-events: none;
+          animation: starBurst 0.8s ease-out forwards;
+        }
+        @keyframes secretReveal {
+          0%  { opacity: 0; transform: translateX(-8px); }
+          100%{ opacity: 1; transform: translateX(0); }
+        }
+        .secret-line {
+          animation: secretReveal 0.5s cubic-bezier(0.34,1.3,0.64,1) forwards;
+          opacity: 0;
+        }
+
         @media (max-width: 430px) {
           .phone-card { border-radius: 0 !important; }
           .header-title { font-size: 18px !important; }
           .cta-btn { font-size: 15px !important; padding: 13px 22px !important; }
         }
-
         @media(min-width: 480px) {
           .phone-card { height: min(860px, 95dvh) !important; border-radius: 44px !important; border: 5px solid #F4E6C6 !important; }
         }
         button:focus-visible, [role="button"]:focus-visible { outline: 2px solid var(--clr-btn2); outline-offset: 2px; }
       `}</style>
 
-      {/* Bear pop floats */}
       {bearPops.map((p) => (
         <div key={p.id} className="bear-pop" style={{ left: p.x, top: p.y }} aria-hidden="true">{p.emoji}</div>
       ))}
+
+      {/* ── 🔐 EASTER EGG OVERLAY ── */}
+      {showEasterEgg && (
+        <>
+          <div
+            className="period-overlay"
+            style={{ zIndex: 290, background: "rgba(255,245,200,0.88)", backdropFilter: "blur(18px)" }}
+            onClick={(e) => { if (e.target === e.currentTarget) setShowEasterEgg(false); }}
+          />
+          {/* confetti */}
+          {Array.from({ length: 14 }, (_, i) => (
+            <div key={i} className="confetti-piece" style={{
+              left: `${15 + Math.random() * 70}%`,
+              top: `${10 + Math.random() * 40}%`,
+              fontSize: 14 + Math.random() * 10,
+              animationDelay: `${Math.random() * 0.5}s`,
+              animationDuration: `${0.9 + Math.random() * 0.6}s`,
+              zIndex: 295,
+            }}>
+              {["🧸","💛","✨","🍯","🎉","🌸","💕","⭐"][Math.floor(Math.random() * 8)]}
+            </div>
+          ))}
+          <div className="easter-egg-popup" role="dialog" aria-modal="true" aria-label="ข้อความลับจากหมีเนย">
+            <div style={{
+              background: "linear-gradient(160deg,#FFFDF6 0%,#FFF9E6 50%,#FFF0CC 100%)",
+              borderRadius: 36, padding: "0 0 22px",
+              border: "2.5px solid rgba(220,185,80,0.55)",
+              boxShadow: "0 32px 90px rgba(180,130,40,0.22), 0 8px 24px rgba(180,130,40,0.14), inset 0 1px 0 rgba(255,255,255,0.95)",
+              width: "min(340px, calc(100vw - 28px))",
+              maxHeight: "88dvh", overflowY: "auto",
+              position: "relative", overflow: "hidden",
+            }}>
+              {/* golden header */}
+              <div style={{
+                background: "linear-gradient(135deg,#F5DFA0,#E8C96A,#D4A83C)",
+                borderRadius: "33px 33px 0 0", padding: "22px 24px 18px",
+                position: "relative", overflow: "hidden", marginBottom: 18,
+              }}>
+                <div style={{ position: "absolute", top: -24, right: -24, width: 90, height: 90, borderRadius: "50%", background: "rgba(255,255,255,0.25)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", bottom: -16, left: -16, width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.18)", pointerEvents: "none" }} />
+
+                {/* close */}
+                <button
+                  onClick={() => setShowEasterEgg(false)} aria-label="ปิด"
+                  style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: "50%", background: "rgba(180,130,40,0.18)", border: "none", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#8B6820", zIndex: 2 }}
+                >✕</button>
+
+                {/* bear5 → unlocked badge */}
+                <div style={{ textAlign: "center", marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                    <BearImage src="/bear5.png" width={90} height={90} alt="หมีเนย — ปลดล็อคข้อความลับแล้ว"
+                      style={{ borderRadius: 22, border: "3px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 20px rgba(180,130,40,0.3)", display: "block", objectFit: "cover" }}
+                    />
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.35)", borderRadius: 999, padding: "3px 12px" }}>
+                    <span style={{ fontSize: 9, color: "#7A5C1A", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase" }}>Secret Unlocked</span>
+                    <span aria-hidden="true" style={{ fontSize: 11 }}>✨</span>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 18, color: "#4A3410", fontWeight: 700, lineHeight: 1.45 }}>เธอเจอข้อความลับแล้วนะ 🎉</div>
+                  <div style={{ fontSize: 11.5, color: "#6B4E18", marginTop: 4, opacity: 0.9 }}>แตะหมีเนยครบ 10 ครั้ง — เก่งมากเลย 🐾</div>
+                </div>
+              </div>
+
+              {/* secret messages */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 16px", marginBottom: 18 }}>
+                {SECRET_MESSAGE_LINES.map((item, i) => (
+                  <div
+                    key={i}
+                    className="secret-line"
+                    style={{
+                      animationDelay: `${0.08 + i * 0.12}s`,
+                      background: i % 2 === 0
+                        ? "linear-gradient(135deg,rgba(255,253,240,0.98),rgba(255,244,200,0.88))"
+                        : "linear-gradient(135deg,rgba(255,249,225,0.9),rgba(255,240,180,0.8))",
+                      borderRadius: 18, padding: "11px 14px",
+                      fontSize: 13.5, color: "#5E4A20", lineHeight: 1.75,
+                      border: "1px solid rgba(220,185,80,0.3)",
+                      display: "flex", gap: 10, alignItems: "flex-start",
+                      boxShadow: "0 2px 10px rgba(180,130,40,0.07)",
+                    }}
+                  >
+                    <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }} aria-hidden="true">{item.icon}</span>
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 22px", marginBottom: 16 }}>
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(200,160,60,0.4),transparent)" }} />
+                <span aria-hidden="true" style={{ fontSize: 13, opacity: 0.55 }}>🍯</span>
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(200,160,60,0.4),transparent)" }} />
+              </div>
+
+              <div style={{ padding: "0 16px" }}>
+                <button
+                  onClick={() => setShowEasterEgg(false)}
+                  className="egg-close-btn"
+                  aria-label="ปิดข้อความลับ"
+                  style={{ width: "100%", color: "#fff", border: "none", borderRadius: 999, padding: "13px 24px", fontSize: 15, fontWeight: 700, fontFamily: "'Fredoka', sans-serif", cursor: "pointer", letterSpacing: "0.3px", boxShadow: "0 8px 24px rgba(63,122,99,0.32), 0 2px 8px rgba(63,122,99,0.18)" }}
+                  onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+                  onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                  onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+                  onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                >ขอบคุณหมีเนยนะ 🧸💛</button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── PERIOD PAGE ── */}
       {showPeriodPage && (
@@ -546,9 +809,9 @@ export default function Home() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 18px", marginBottom: 20 }}>
                {[
   { delay: "0.05s", icon: "🧸", text: "วันนี้ทำงานเหนื่อยแค่ไหน หมีเนยก็ส่งกำลังใจไปด้วยทุกนาทีเลยนะ 💛" },
-  { delay: "0.15s", icon: "📸", text: "ถ้าเครียดมากๆ ลองพักสายตา ถ่ายรูปอะไรน่ารักๆ ผ่อนใจบ้างนะ หมีเนยรอดูอยู่เลย 🌷" },
-  { delay: "0.25s", icon: "🎵", text: "ทำงานไปด้วย เปิดเพลงเพราะๆ คลอไปด้วยนะ แล้วอย่าลืมแวะกินของอร่อยด้วยน้า 🍜" },
-  { delay: "0.35s", icon: "🎶", text: "มีหมีเนยคอยเอาใจช่วยทุกเรื่องเลยน้า 🧸💖" },
+  { delay: "0.15s", icon: "📸", text: "ถ้าเครียดมากๆ ลองพักสายตา ถ่ายรูปอะไรน่ารักๆ หมีเนยรอดูอยู่เลย 🌷" },
+  { delay: "0.25s", icon: "🎵", text: "ทำงานไปด้วย เปิดเพลงเพราะๆไปด้วยน้า แล้วอย่าลืมแวะกินของอร่อยด้วยน้า 🍜" },
+  { delay: "0.35s", icon: "🎶", text: "มีหมีเนยคอยเอาใจช่วยทุกเรื่องเลยน้า🧸💖" },
 ].map((item, i) => (
                   <div key={i} className="msg-line" style={{
                     animationDelay: item.delay,
@@ -671,10 +934,10 @@ export default function Home() {
               </div>
               <div style={{ flex: 1 }}>
                 <h1 className="header-title" style={{ fontSize: 19, color: "var(--clr-text-h)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "0.2px" }}>Butterbear 🧸</h1>
-                <p style={{ fontSize: 12, color: "var(--clr-text-s)", marginTop: 1 }}>
+                <p key={timeStatus} className="time-status" style={{ fontSize: 11.5, color: "var(--clr-btn2)", marginTop: 2, lineHeight: 1.4, fontWeight: 500 }}>
                   {isTyping
-                    ? <span style={{ display: "flex", alignItems: "center", gap: 4 }} aria-live="polite" aria-label="หมีเนยกำลังพิมพ์"><span>กำลังพิมพ์</span>{[0,1,2].map((i) => <span key={i} className="typing-dot" style={{ width: 5, height: 5, animationDelay: `${i*0.2}s` }} />)}</span>
-                    : "สำหรับวันที่เหนื่อย 💛"}
+                    ? <span style={{ display: "flex", alignItems: "center", gap: 4 }} aria-live="polite" aria-label="หมีเนยกำลังพิมพ์"><span style={{ color: "var(--clr-text-s)" }}>กำลังพิมพ์</span>{[0,1,2].map((i) => <span key={i} className="typing-dot" style={{ width: 5, height: 5, animationDelay: `${i*0.2}s` }} />)}</span>
+                    : timeStatus}
                 </p>
               </div>
               {msgCounter > 0 && (
@@ -689,7 +952,7 @@ export default function Home() {
           {/* ── CHAT AREA ── */}
           <section
             className="chat-area" aria-label="บทสนทนากับหมีเนย" aria-live="polite"
-            style={{ flex: 1, overflowY: "auto", padding: "14px 16px 10px", paddingRight: "clamp(16px, 28vw, 120px)", position: "relative", zIndex: 5, display: "flex", flexDirection: "column", gap: 12 }}
+            style={{ flex: 1, overflowY: "auto", padding: "14px 16px 10px", paddingRight: "clamp(16px, 22vw, 90px)", position: "relative", zIndex: 5, display: "flex", flexDirection: "column", gap: 12 }}
           >
             <div style={{ textAlign: "center", marginBottom: 2 }}>
               <span style={{ background: "rgba(63,122,99,0.12)", color: "var(--clr-btn2)", fontSize: 11, padding: "4px 14px", borderRadius: 999, fontWeight: 500 }}>
@@ -711,8 +974,46 @@ export default function Home() {
             <div ref={chatEndRef} />
           </section>
 
-          {/* ── BEAR (tappable) ── */}
-          <div style={{ position: "absolute", bottom: 170, right: 12, zIndex: 20, userSelect: "none" }}>
+          {/* ── BEAR (tappable) + TAP HINT + PROGRESS ── */}
+          <div style={{ position: "absolute", bottom: 186, right: 10, zIndex: 20, userSelect: "none" }}>
+
+            {/* Subtle hint: appears after tap 3 */}
+            {showTapHint && !easterEggUnlocked && (
+              <div
+                className="tap-hint"
+                aria-hidden="true"
+                style={{
+                  position: "absolute", bottom: "calc(100% + 6px)", right: 0,
+                  background: "rgba(63,122,99,0.88)", color: "#FFFAEE",
+                  fontSize: 10, fontFamily: "'Fredoka', sans-serif",
+                  padding: "4px 10px", borderRadius: 999,
+                  whiteSpace: "nowrap", fontWeight: 500,
+                  boxShadow: "0 2px 8px rgba(63,122,99,0.25)",
+                  pointerEvents: "none",
+                }}
+              >
+                แตะต่อไปสิ... 🐾
+              </div>
+            )}
+
+            {/* Progress dots — only show after first tap */}
+            {bearTapCount > 0 && !easterEggUnlocked && (
+              <div
+                aria-hidden="true"
+                style={{
+                  display: "flex", gap: 3, justifyContent: "center",
+                  marginBottom: 5,
+                }}
+              >
+                {Array.from({ length: 10 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`tap-progress-dot${i < tapProgress ? " filled" : ""}`}
+                  />
+                ))}
+              </div>
+            )}
+
             <button
               onClick={handleBearTap} onTouchStart={handleBearTap}
               aria-label="แตะหมีเนยเพื่อรับกำลังใจ"
@@ -721,7 +1022,9 @@ export default function Home() {
               <div className={`${bearShake ? "bear-shake" : bearBounce ? "bear-bounce" : "bear-bob"}`} style={{ transformOrigin: "center bottom" }}>
                 <BearImage src="/bear.png" width={100} height={100} alt="หมีเนย" style={{ filter: "drop-shadow(0 8px 20px rgba(63,122,99,0.28))" }} />
               </div>
-              <div style={{ textAlign: "center", fontSize: 9, color: "var(--clr-text-m)", marginTop: -4, opacity: 0.7, letterSpacing: "0.5px" }} aria-hidden="true">แตะได้นะ 🐾</div>
+              <div style={{ textAlign: "center", fontSize: 9, color: "var(--clr-text-m)", marginTop: -4, opacity: 0.7, letterSpacing: "0.5px" }} aria-hidden="true">
+                {easterEggUnlocked ? "🔓 ปลดล็อคแล้ว!" : "แตะได้นะ 🐾"}
+              </div>
             </button>
           </div>
 
@@ -763,15 +1066,11 @@ export default function Home() {
             <div role="region" aria-label="เครื่องเล่นเพลง"
               style={{ background: "linear-gradient(135deg,rgba(255,253,246,0.97),rgba(238,247,242,0.97))", borderRadius: 20, border: "1.5px solid rgba(143,198,174,0.45)", padding: "10px 14px 10px", boxShadow: "0 4px 16px rgba(63,122,99,0.1)" }}
             >
-              {/* Row 1: disc + title + bars + controls */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                {/* Vinyl */}
                 <div aria-hidden="true" style={{ width: 38, height: 38, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(63,122,99,0.28)", position: "relative", overflow: "hidden", background: "#3F7A63" }}>
                   <div className={isPlaying ? "vinyl-spin" : ""} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "conic-gradient(from 0deg,#3F7A63 0%,#9BD7BA 25%,#5C9C82 50%,#CDA978 75%,#3F7A63 100%)", opacity: 0.9 }} />
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFFDF6", border: "2px solid var(--clr-btn)", position: "relative", zIndex: 2 }} />
                 </div>
-
-                {/* Track name + artist */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div key={trackIndex} className="track-name-anim" style={{ fontSize: 12, fontWeight: 600, color: "var(--clr-text-h)", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
                     {PLAYLIST[trackIndex].title}
@@ -780,21 +1079,15 @@ export default function Home() {
                     {PLAYLIST[trackIndex].artist}
                   </div>
                 </div>
-
-                {/* Music bars */}
                 <div aria-hidden="true" style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 16, opacity: isPlaying ? 1 : 0.25, transition: "opacity 0.3s", marginRight: 2 }}>
                   {[{ cls: "music-bar-a", h: 4 }, { cls: "music-bar-b", h: 10 }, { cls: "music-bar-c", h: 7 }].map(({ cls, h }, i) => (
                     <div key={i} className={isPlaying ? cls : ""} style={{ width: 3, height: isPlaying ? undefined : h, background: "var(--clr-btn2)", borderRadius: 2 }} />
                   ))}
                 </div>
-
-                {/* Volume */}
                 <button onClick={() => setShowVolumeSlider((v) => !v)} aria-label={`ปรับระดับเสียง — ${Math.round(volume * 100)}%`} aria-expanded={showVolumeSlider}
                   style={{ background: showVolumeSlider ? "rgba(63,122,99,0.14)" : "transparent", border: "none", cursor: "pointer", fontSize: 15, padding: "3px 5px", borderRadius: 8 }}>
                   {volume === 0 ? "🔇" : volume < 0.4 ? "🔉" : "🔊"}
                 </button>
-
-                {/* ── Prev / Play / Next ── */}
                 <button className="nav-btn" onClick={() => changeTrack(-1)} aria-label="เพลงก่อนหน้า">⏮</button>
                 <button
                   onClick={togglePlay} aria-label={isPlaying ? "หยุดเพลง" : "เล่นเพลง"} aria-pressed={isPlaying}
@@ -806,8 +1099,6 @@ export default function Home() {
                 >{isPlaying ? "⏸" : "▶️"}</button>
                 <button className="nav-btn" onClick={() => changeTrack(1)} aria-label="เพลงถัดไป">⏭</button>
               </div>
-
-              {/* Track indicator dots */}
               <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 8 }} aria-hidden="true">
                 {PLAYLIST.map((_, i) => (
                   <button
@@ -819,8 +1110,6 @@ export default function Home() {
                   />
                 ))}
               </div>
-
-              {/* Volume slider */}
               {showVolumeSlider && (
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                   <span aria-hidden="true" style={{ fontSize: 10, color: "var(--clr-text-s)" }}>🔈</span>
@@ -828,8 +1117,6 @@ export default function Home() {
                   <span aria-hidden="true" style={{ fontSize: 10, color: "var(--clr-text-s)" }}>🔊</span>
                 </div>
               )}
-
-              {/* Progress bar */}
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 10, color: "var(--clr-text-s)", minWidth: 28 }} aria-hidden="true">{formatTime(progress * duration)}</span>
                 <div
@@ -851,7 +1138,6 @@ export default function Home() {
   );
 }
 
-// ─── Chat bubble ───
 function BubbleMessage({ img, text, isFirst }: { img: string; text: string; isFirst?: boolean }) {
   return (
     <div className="bubble-anim" style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
