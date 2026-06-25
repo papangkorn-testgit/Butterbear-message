@@ -40,6 +40,21 @@ const MESSAGES = [
   "งานเยอะแค่ไหนก็สู้รอยยิ้มเธอไม่ได้ 🌸",
 ];
 
+// ─── 💛 ข้อความปลอบใจ "เข้มข้น" สำหรับวันเหนื่อยจัดๆ ───
+const TIRED_MESSAGES = [
+
+  "หมีเนยรู้ว่าวันนี้หนักมาก แค่ผ่านมาได้ก็เก่งมากแล้ว 💛",
+  "ไม่ต้องฝืนยิ้มก็ได้นะ หมีเนยเข้าใจว่าวันนี้มันเหนื่อยจริงๆ 🥺",
+  "พักก่อนนะ ทุกอย่างรอได้ แต่ตัวเธอสำคัญที่สุด 🌙",
+  "ถึงจะเหนื่อยแค่ไหน หมีเนยก็ยังอยู่ตรงนี้เป็นกำลังใจให้เสมอนะ 🍯",
+  "วันนี้เหนื่อยมากใช่มั้ย... กอดแน่นๆ ไปเลยนะ 💖",
+  "ไม่ต้องแบกไว้คนเดียวนะ หมีเนยรับฟังอยู่ตลอด 🌿",
+  "ขนาดเหนื่อยขนาดนี้ก็ยังสู้มาได้ เก่งมากจริงๆนะ ✨",
+  "วันที่หนักที่สุดก็ยังผ่านมาได้ หมีเนยภูมิใจในตัวเธอมากเลย 💖",
+  "คนที่เหนื่อยแล้วยังไม่ยอมแพ้ คือคนที่เก่งที่สุดเลยนะ 🧸",
+
+];
+
 const BEAR_REACTIONS = ["🧸", "💛", "🎵", "✨", "🍯", "💕", "🎶", "⭐"];
 
 // ─── 🔐 EASTER EGG — ข้อความลับจากหมีเนย ───
@@ -51,6 +66,13 @@ const SECRET_MESSAGE_LINES = [
 ];
 // ─────────────────────────────────────────────
 
+// ─── 🥺 ข้อความในป๊อปอัปปุ่มลึกลับ — สำหรับวันที่เหนื่อยเป็นพิเศษ ───
+const SPECIAL_TIRED_LINES = [
+  { delay: "0.05s", icon: "🧸", text: "วันนี้งานหนักเลยสินะ สู้ ๆ นะ หมีเนยเป็นกำลังใจให้อยู่ตรงนี้เสมอ 💛" },
+  { delay: "0.25s", icon: "🍯", text: "อย่าลืมหาเวลาจิบน้ำ พักสายตาบ้างนะ เป็นห่วงน้า" },
+  { delay: "0.25s", icon: "🍯", text: "ขอให้ช่วงเวลาที่เหลือของงานวันนี้ผ่านไปแบบราบรื่นนะ หมีเนยเอาใจช่วยเต็มที่เลย" },
+  { delay: "0.35s", icon: "🌙", text: "อีกนิดเดียวก็ใกล้ได้พักแล้วนะ เก่งมากเลยที่พยายามมาตลอดทั้งวัน 💖" },
+];
 // ─── Time-based status messages ───
 function getTimeBasedStatus(): string {
   const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -76,7 +98,7 @@ function getTimeBasedStatus(): string {
 }
 
 interface Sparkle    { id: number; x: number; y: number; size: number; duration: number; delay: number; emoji: string; }
-interface ChatMessage { id: number; text: string; }
+interface ChatMessage { id: number; text: string; special?: boolean; }
 interface BearPop    { id: number; x: number; y: number; emoji: string; }
 
 // ─── Bear image with emoji fallback ───
@@ -113,6 +135,7 @@ function BearImage({
 export default function Home() {
   const [chat, setChat]               = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping]       = useState(false);
+  const [isTiredTyping, setIsTiredTyping] = useState(false);
 
   const isSpecialTime = () => {
     const thai = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -124,6 +147,7 @@ export default function Home() {
   const [showPeriodPage, setShowPeriodPage]     = useState(false);
   const [sparkles, setSparkles]                 = useState<Sparkle[]>([]);
   const [isPressed, setIsPressed]               = useState(false);
+  const [isTiredPressed, setIsTiredPressed]     = useState(false);
   const [msgCounter, setMsgCounter]             = useState(0);
 
   // ── Easter egg state ──
@@ -153,6 +177,7 @@ export default function Home() {
   const audioRef      = useRef<HTMLAudioElement | null>(null);
   const chatEndRef    = useRef<HTMLDivElement | null>(null);
   const usedIndexes   = useRef<number[]>([]);
+  const usedTiredIndexes = useRef<number[]>([]);
   const bearPopIdRef  = useRef(0);
 
   const SPARKLE_EMOJIS = ["✨", "🎵", "💕", "⭐", "🍯", "🎶", "💛"];
@@ -192,7 +217,7 @@ export default function Home() {
   // ─── Auto-scroll chat ───
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat, isTyping]);
+  }, [chat, isTyping, isTiredTyping]);
 
   // ─── Welcome / special popup ───
   useEffect(() => {
@@ -287,6 +312,23 @@ export default function Home() {
       gain.gain.setValueAtTime(0.18, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
       osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18);
+    } catch {}
+  }, []);
+
+  // softer, lower, warmer "hug" chime — used for the tired/comfort message
+  const playHugSound = useCallback(() => {
+    try {
+      const ctx = getAudioCtx(); const now = ctx.currentTime;
+      const notes = [[392, 0], [466, 0.16], [523, 0.34]];
+      notes.forEach(([freq, delay]) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = "sine"; osc.frequency.setValueAtTime(freq, now + delay);
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(0.14, now + delay + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.7);
+        osc.start(now + delay); osc.stop(now + delay + 0.75);
+      });
     } catch {}
   }, []);
 
@@ -396,8 +438,17 @@ export default function Home() {
     return MESSAGES[pick];
   }, []);
 
+  // ─── Random tired/comfort message ───
+  const getRandomTiredMessage = useCallback(() => {
+    if (usedTiredIndexes.current.length >= TIRED_MESSAGES.length) usedTiredIndexes.current = [];
+    const available = TIRED_MESSAGES.map((_, i) => i).filter((i) => !usedTiredIndexes.current.includes(i));
+    const pick = available[Math.floor(Math.random() * available.length)];
+    usedTiredIndexes.current.push(pick);
+    return TIRED_MESSAGES[pick];
+  }, []);
+
   const sendMessage = useCallback(() => {
-    if (isTyping) return;
+    if (isTyping || isTiredTyping) return;
     setIsTyping(true);
     setTimeout(() => {
       setMsgCounter((c) => c + 1);
@@ -405,7 +456,20 @@ export default function Home() {
       setIsTyping(false);
       playMessageSound();
     }, 1200 + Math.random() * 600);
-  }, [isTyping, getRandomMessage, playMessageSound]);
+  }, [isTyping, isTiredTyping, getRandomMessage, playMessageSound]);
+
+  // ─── "วันนี้เหนื่อยมาก" → ส่งข้อความปลอบใจเข้มข้น ───
+  const sendTiredMessage = useCallback(() => {
+    if (isTyping || isTiredTyping) return;
+    setIsTiredTyping(true);
+    setBearBounce(true); setTimeout(() => setBearBounce(false), 600);
+    setTimeout(() => {
+      setMsgCounter((c) => c + 1);
+      setChat((prev) => [...prev, { id: Date.now(), text: getRandomTiredMessage(), special: true }]);
+      setIsTiredTyping(false);
+      playHugSound();
+    }, 1400 + Math.random() * 600);
+  }, [isTyping, isTiredTyping, getRandomTiredMessage, playHugSound]);
 
   // ── Progress dots for easter egg ──
   const tapProgress = Math.min(bearTapCount, 10);
@@ -442,6 +506,8 @@ export default function Home() {
           --clr-pink:     #F498A8;
           --clr-check-a:  #FFFDF5;
           --clr-check-b:  #3F7A63;
+          --clr-hug:      #F3B9C4;
+          --clr-hug2:     #E892A2;
         }
         .bg-dots {
           background-color: #FFFAEE;
@@ -478,10 +544,13 @@ export default function Home() {
         .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--clr-text-m); display: inline-block; animation: typingDot 1.2s infinite ease-in-out; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dot-hug { background: var(--clr-hug2) !important; }
         @keyframes bubblePop { 0% { opacity: 0; transform: translateY(12px) scale(0.85); } 60% { transform: translateY(-3px) scale(1.03); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         .bubble-anim { animation: bubblePop 0.45s cubic-bezier(0.34,1.4,0.64,1) forwards; }
         @keyframes btnPulse { 0% { box-shadow: 0 0 0 0 rgba(63,122,99,0.45); } 70% { box-shadow: 0 0 0 16px rgba(63,122,99,0); } 100% { box-shadow: 0 0 0 0 rgba(63,122,99,0); } }
         .btn-pulse { animation: btnPulse 0.5s ease; }
+        @keyframes btnPulseHug { 0% { box-shadow: 0 0 0 0 rgba(232,146,162,0.5); } 70% { box-shadow: 0 0 0 16px rgba(232,146,162,0); } 100% { box-shadow: 0 0 0 0 rgba(232,146,162,0); } }
+        .btn-pulse-hug { animation: btnPulseHug 0.5s ease; }
         .chat-area::-webkit-scrollbar       { width: 4px; }
         .chat-area::-webkit-scrollbar-track { background: transparent; }
         .chat-area::-webkit-scrollbar-thumb { background: #EFD9A8; border-radius: 999px; }
@@ -641,6 +710,49 @@ export default function Home() {
           opacity: 0;
         }
 
+        /* ── TIRED BUTTON ── */
+        @keyframes tiredGlow {
+          0%,100% { box-shadow: 0 6px 18px rgba(232,146,162,0.32), 0 2px 8px rgba(232,146,162,0.2); }
+          50%      { box-shadow: 0 6px 22px rgba(232,146,162,0.48), 0 2px 10px rgba(232,146,162,0.3); }
+        }
+        .tired-btn {
+          width: 100%;
+          background: linear-gradient(135deg, var(--clr-hug), var(--clr-hug2));
+          color: #fff; border: none; border-radius: 16px;
+          padding: 11px 20px; font-size: 13.5px; font-weight: 600;
+          font-family: 'Fredoka', sans-serif; cursor: pointer;
+          letter-spacing: 0.2px; margin-bottom: 8px;
+          display: flex; align-items: center; justify-content: center; gap: 6px;
+          transition: transform 0.15s, opacity 0.15s;
+          animation: tiredGlow 2.4s ease-in-out infinite;
+        }
+        .tired-btn:disabled { opacity: 0.7; cursor: not-allowed; animation: none; }
+        .tired-btn-main {
+          border-radius: 18px;
+          padding: 14px 24px;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+
+        /* ── SPECIAL (hug) CHAT BUBBLE ── */
+        @keyframes hugBadgeIn {
+          0%   { opacity: 0; transform: translateY(4px) scale(0.9); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .hug-badge {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: rgba(232,146,162,0.18); color: var(--clr-hug2);
+          font-size: 10px; font-weight: 600; padding: 2px 9px;
+          border-radius: 999px; margin-bottom: 5px;
+          animation: hugBadgeIn 0.35s ease forwards;
+        }
+        @keyframes hugPulseRing {
+          0%   { box-shadow: 0 0 0 0 rgba(232,146,162,0.45); }
+          70%  { box-shadow: 0 0 0 10px rgba(232,146,162,0); }
+          100% { box-shadow: 0 0 0 0 rgba(232,146,162,0); }
+        }
+        .hug-avatar { animation: hugPulseRing 1.8s ease-out infinite; border-radius: 50%; }
+
         @media (max-width: 430px) {
           .phone-card { border-radius: 0 !important; }
           .header-title { font-size: 18px !important; }
@@ -768,11 +880,11 @@ export default function Home() {
         </>
       )}
 
-      {/* ── PERIOD PAGE ── */}
+      {/* ── PERIOD PAGE — ตอนนี้ใช้สำหรับ "วันที่เหนื่อยเป็นพิเศษ" ── */}
       {showPeriodPage && (
         <div
           className="period-overlay"
-          role="dialog" aria-modal="true" aria-label="ข้อความพิเศษจากหมีเนย"
+          role="dialog" aria-modal="true" aria-label="ข้อความสำหรับวันที่เหนื่อยเป็นพิเศษ"
           onClick={(e) => { if (e.target === e.currentTarget) setShowPeriodPage(false); }}
         >
           <div className="period-card" style={{ width: "min(348px, calc(100vw - 28px))", maxHeight: "92dvh", overflowY: "auto" }}>
@@ -790,29 +902,24 @@ export default function Home() {
               }}>
                 <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.22)", pointerEvents: "none" }} />
                 <div style={{ position: "absolute", bottom: -20, left: -20, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.16)", pointerEvents: "none" }} />
-                <span className="note-float" style={{ top: 14, left: 22, color: "#fff" }} aria-hidden="true">🎵</span>
-                <span className="note-float" style={{ top: 30, right: 30, color: "#fff", animationDelay: "1.4s" }} aria-hidden="true">🎶</span>
+                <span className="note-float" style={{ top: 14, left: 22, color: "#fff" }} aria-hidden="true">🍯</span>
+                <span className="note-float" style={{ top: 30, right: 30, color: "#fff", animationDelay: "1.4s" }} aria-hidden="true">💛</span>
                 <button
                   onClick={() => setShowPeriodPage(false)} aria-label="ปิดหน้าต่างนี้"
                   style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: "50%", background: "rgba(63,122,99,0.16)", border: "none", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#3F7A63", zIndex: 2 }}
                 >✕</button>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                  <BearImage src="/bear4.png" width={130} height={130} alt="หมีเนย — กำลังส่งกำลังใจพร้อมเพลงโปรด"
+                  <BearImage src="/bear4.png" width={130} height={130} alt="หมีเนย — กำลังกอดปลอบใจ"
                     style={{ borderRadius: 24, border: "3px solid rgba(255,255,255,0.9)", boxShadow: "0 8px 24px rgba(63,122,99,0.25)", display: "block", objectFit: "cover" }}
                   />
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 19, color: "#3F5E4A", fontWeight: 600, lineHeight: 1.4 }}>หมีเนยอยู่ตรงนี้เสมอนะ 🧸</div>
-                  <div style={{ fontSize: 12, color: "#5C8C72", marginTop: 4, opacity: 0.9 }}>ไม่ว่าจะเป็นยังไง หมีเนยเข้าใจ 💛</div>
+                  <div style={{ fontSize: 19, color: "#3F5E4A", fontWeight: 600, lineHeight: 1.4 }}>วันนี้เหนื่อยเป็นพิเศษเลยใช่มั้ย 🥺</div>
+                  <div style={{ fontSize: 12, color: "#5C8C72", marginTop: 4, opacity: 0.9 }}>ไม่ต้องเก่งทุกวันก็ได้นะ หมีเนยเข้าใจ 💛</div>
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 18px", marginBottom: 20 }}>
-               {[
-  { delay: "0.05s", icon: "🧸", text: "วันนี้ทำงานเหนื่อยแค่ไหน หมีเนยก็ส่งกำลังใจไปด้วยทุกนาทีเลยนะ 💛" },
-  { delay: "0.15s", icon: "📸", text: "ถ้าเครียดมากๆ ลองพักสายตา ถ่ายรูปอะไรน่ารักๆ หมีเนยรอดูอยู่เลย 🌷" },
-  { delay: "0.25s", icon: "🎵", text: "ทำงานไปด้วย เปิดเพลงเพราะๆไปด้วยน้า แล้วอย่าลืมแวะกินของอร่อยด้วยน้า 🍜" },
-  { delay: "0.35s", icon: "🎶", text: "มีหมีเนยคอยเอาใจช่วยทุกเรื่องเลยน้า🧸💖" },
-].map((item, i) => (
+               {SPECIAL_TIRED_LINES.map((item, i) => (
                   <div key={i} className="msg-line" style={{
                     animationDelay: item.delay,
                     background: i % 2 === 0 ? "linear-gradient(135deg,rgba(255,253,246,0.95),rgba(243,236,217,0.9))" : "linear-gradient(135deg,rgba(238,247,242,0.9),rgba(223,240,231,0.85))",
@@ -828,7 +935,7 @@ export default function Home() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 24px", marginBottom: 18 }}>
                 <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(95,160,130,0.35),transparent)" }} />
-                <span aria-hidden="true" style={{ fontSize: 14, opacity: 0.6 }}>🎵</span>
+                <span aria-hidden="true" style={{ fontSize: 14, opacity: 0.6 }}>🍯</span>
                 <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(95,160,130,0.35),transparent)" }} />
               </div>
               <div style={{ padding: "0 18px" }}>
@@ -935,8 +1042,8 @@ export default function Home() {
               <div style={{ flex: 1 }}>
                 <h1 className="header-title" style={{ fontSize: 19, color: "var(--clr-text-h)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "0.2px" }}>Butterbear 🧸</h1>
                 <p key={timeStatus} className="time-status" style={{ fontSize: 11.5, color: "var(--clr-btn2)", marginTop: 2, lineHeight: 1.4, fontWeight: 500 }}>
-                  {isTyping
-                    ? <span style={{ display: "flex", alignItems: "center", gap: 4 }} aria-live="polite" aria-label="หมีเนยกำลังพิมพ์"><span style={{ color: "var(--clr-text-s)" }}>กำลังพิมพ์</span>{[0,1,2].map((i) => <span key={i} className="typing-dot" style={{ width: 5, height: 5, animationDelay: `${i*0.2}s` }} />)}</span>
+                  {isTyping || isTiredTyping
+                    ? <span style={{ display: "flex", alignItems: "center", gap: 4 }} aria-live="polite" aria-label="หมีเนยกำลังพิมพ์"><span style={{ color: "var(--clr-text-s)" }}>กำลังพิมพ์</span>{[0,1,2].map((i) => <span key={i} className={`typing-dot${isTiredTyping ? " typing-dot-hug" : ""}`} style={{ width: 5, height: 5, animationDelay: `${i*0.2}s` }} />)}</span>
                     : timeStatus}
                 </p>
               </div>
@@ -961,13 +1068,21 @@ export default function Home() {
             </div>
             <BubbleMessage img="/bear2.png" text="สวัสดีคนเก่งของหมีเนย 🧸" isFirst />
             {chat.map((msg) => (
-              <BubbleMessage key={msg.id} img="/bear2.png" text={msg.text} />
+              <BubbleMessage key={msg.id} img="/bear2.png" text={msg.text} special={msg.special} />
             ))}
             {isTyping && (
               <div className="bubble-anim" style={{ display: "flex", gap: 10, alignItems: "flex-end" }} aria-hidden="true">
                 <BearImage src="/bear2.png" width={36} height={36} alt="" style={{ borderRadius: "50%", flexShrink: 0 }} />
                 <div style={{ background: "var(--clr-bubble)", borderRadius: "20px 20px 20px 4px", padding: "12px 18px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 8px rgba(63,122,99,0.1)" }}>
                   <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
+                </div>
+              </div>
+            )}
+            {isTiredTyping && (
+              <div className="bubble-anim" style={{ display: "flex", gap: 10, alignItems: "flex-end" }} aria-hidden="true">
+                <BearImage src="/bear2.png" width={36} height={36} alt="" style={{ borderRadius: "50%", flexShrink: 0 }} />
+                <div style={{ background: "rgba(243,185,196,0.28)", border: "1px solid rgba(232,146,162,0.35)", borderRadius: "20px 20px 20px 4px", padding: "12px 18px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 8px rgba(232,146,162,0.15)" }}>
+                  <span className="typing-dot typing-dot-hug" /><span className="typing-dot typing-dot-hug" /><span className="typing-dot typing-dot-hug" />
                 </div>
               </div>
             )}
@@ -1034,32 +1149,34 @@ export default function Home() {
               onClick={() => { setShowPeriodPage(true); playPopupSound(); setBtnSparkle(true); setTimeout(() => setBtnSparkle(false), 600); }}
               onMouseEnter={() => setMysteriousTooltip(true)} onMouseLeave={() => setMysteriousTooltip(false)}
               onFocus={() => setMysteriousTooltip(true)} onBlur={() => setMysteriousTooltip(false)}
-              className="mysterious-btn" aria-label="ข้อความพิเศษจากหมีเนย — เปิดดู" aria-haspopup="dialog"
+              className="mysterious-btn" aria-label="ข้อความสำหรับวันที่เหนื่อยเป็นพิเศษ — เปิดดู" aria-haspopup="dialog"
               style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#E3F4EB,#BFE6D2,#9BD7BA)", border: "2px solid rgba(180,235,210,0.9)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.15s" }}
               onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.88)")}
               onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              <span className="star-icon" aria-hidden="true">🎵</span>
-              {mysteriousTooltip && <div className="mysterious-tooltip" role="tooltip">ข้อความพิเศษ 🧸</div>}
+              <span className="star-icon" aria-hidden="true">🍯</span>
+              {mysteriousTooltip && <div className="mysterious-tooltip" role="tooltip">วันนี้เหนื่อยมั้ย 🥺</div>}
             </button>
             <div style={{ textAlign: "center", fontSize: 9, color: "var(--clr-text-m)", marginTop: 3, opacity: 0.75, letterSpacing: "0.3px", pointerEvents: "none", whiteSpace: "nowrap" }} aria-hidden="true">พิเศษ ✨</div>
           </div>
 
           {/* ── BOTTOM ZONE ── */}
           <footer className="safe-bottom" style={{ background: "linear-gradient(180deg,transparent 0%,#FFFBF0 22%)", paddingTop: 8, paddingLeft: 16, paddingRight: 16, position: "relative", zIndex: 10, flexShrink: 0 }}>
+            {/* ── ปุ่มหลัก: ขอกำลังใจพิเศษจากหมีเนย ── */}
             <button
-              onClick={() => { if (!isTyping) { setIsPressed(true); setTimeout(() => setIsPressed(false), 500); sendMessage(); } }}
-              className={`cta-btn ${isPressed ? "btn-pulse" : ""}`}
-              disabled={isTyping} aria-label={isTyping ? "รอหมีเนยพิมพ์ข้อความ" : "รับกำลังใจจากหมีเนย"} aria-busy={isTyping}
-              style={{ width: "100%", background: isTyping ? "linear-gradient(135deg,#AECFBE,#8FBBA6)" : "linear-gradient(135deg,var(--clr-btn),var(--clr-btn2))", color: "#fff", border: "none", borderRadius: 18, padding: "14px 24px", fontSize: 16, fontWeight: 600, fontFamily: "'Fredoka', sans-serif", cursor: isTyping ? "not-allowed" : "pointer", transition: "transform 0.15s, opacity 0.15s", opacity: isTyping ? 0.85 : 1, boxShadow: isTyping ? "none" : "0 6px 20px rgba(63,122,99,0.35), 0 2px 8px rgba(63,122,99,0.2)", letterSpacing: "0.3px", marginBottom: 10 }}
+              onClick={() => { if (!isTyping && !isTiredTyping) { setIsTiredPressed(true); setTimeout(() => setIsTiredPressed(false), 500); sendTiredMessage(); } }}
+              className={`tired-btn tired-btn-main ${isTiredPressed ? "btn-pulse-hug" : ""}`}
+              disabled={isTyping || isTiredTyping}
+              aria-label={isTiredTyping ? "รอหมีเนยปลอบใจ" : "วันนี้เหนื่อยมากเป็นพิเศษ — ขอกำลังใจเข้มข้น"}
+              aria-busy={isTiredTyping}
               onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
               onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
               onTouchStart={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
               onTouchEnd={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              {isTyping ? "หมีเนยกำลังพิมพ์... 🐾" : "รับกำลังใจจากหมีเนย 🤍"}
+              {isTiredTyping ? <>🫂 หมีเนยกำลังกอด...</> : <>วันนี้เหนื่อยมากเป็นพิเศษ 🫂</>}
             </button>
 
             {/* ── MUSIC PLAYER ── */}
@@ -1138,14 +1255,24 @@ export default function Home() {
   );
 }
 
-function BubbleMessage({ img, text, isFirst }: { img: string; text: string; isFirst?: boolean }) {
+function BubbleMessage({ img, text, isFirst, special }: { img: string; text: string; isFirst?: boolean; special?: boolean }) {
   return (
     <div className="bubble-anim" style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-      <BearImage src={img} width={36} height={36} alt="" style={{ borderRadius: "50%", flexShrink: 0 }} />
-      <div
-        role="article" aria-label={`ข้อความจากหมีเนย: ${text}`}
-        style={{ background: isFirst ? "var(--clr-bubble1)" : "var(--clr-bubble)", color: "var(--clr-text-h)", padding: "12px 18px", borderRadius: "20px 20px 20px 4px", maxWidth: "76%", fontSize: 15, lineHeight: 1.6, boxShadow: "0 2px 10px rgba(63,122,99,0.1)", border: "1px solid rgba(143,198,174,0.4)", fontWeight: 500 }}
-      >{text}</div>
+      <BearImage src={img} width={36} height={36} alt="" className={special ? "hug-avatar" : undefined} style={{ borderRadius: "50%", flexShrink: 0 }} />
+      <div role="article" aria-label={`ข้อความจากหมีเนย: ${text}`} style={{ maxWidth: "76%" }}>
+        {special && <div className="hug-badge" aria-hidden="true"><span>🫂</span><span>หมีเนยกอดแน่นๆ</span></div>}
+        <div
+          style={{
+            background: special ? "linear-gradient(135deg,rgba(243,185,196,0.32),rgba(232,146,162,0.22))" : (isFirst ? "var(--clr-bubble1)" : "var(--clr-bubble)"),
+            color: special ? "#7A3B49" : "var(--clr-text-h)",
+            padding: "12px 18px", borderRadius: "20px 20px 20px 4px",
+            fontSize: 15, lineHeight: 1.6,
+            boxShadow: special ? "0 2px 12px rgba(232,146,162,0.22)" : "0 2px 10px rgba(63,122,99,0.1)",
+            border: special ? "1px solid rgba(232,146,162,0.4)" : "1px solid rgba(143,198,174,0.4)",
+            fontWeight: 500,
+          }}
+        >{text}</div>
+      </div>
     </div>
   );
 }
